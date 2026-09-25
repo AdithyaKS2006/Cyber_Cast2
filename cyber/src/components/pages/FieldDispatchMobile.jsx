@@ -4,8 +4,10 @@ import {
   Clock, Compass, ExternalLink, RefreshCw, Send, Radio, UserCheck
 } from 'lucide-react';
 import api from '../../utils/apiClient';
+import useTheme from '../../hooks/useTheme';
 
 export default function FieldDispatchMobile() {
+  const isLight = useTheme();
   const [dispatches, setDispatches] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeDispatch, setActiveDispatch] = useState(null);
@@ -85,31 +87,39 @@ export default function FieldDispatchMobile() {
   ];
 
   return (
-    <div className="max-w-md mx-auto bg-slate-950 text-slate-100 min-h-screen border-x border-slate-800 shadow-2xl flex flex-col">
+    <div className={`max-w-md mx-auto min-h-screen border-x shadow-2xl flex flex-col transition-colors ${
+      isLight ? 'bg-white text-slate-800 border-slate-200' : 'bg-slate-950 text-slate-100 border-slate-800'
+    }`}>
       {/* Mobile Top App Bar */}
-      <div className="bg-slate-900 border-b border-slate-800 p-4 sticky top-0 z-20 flex items-center justify-between shadow-md">
+      <div className={`border-b p-4 sticky top-0 z-20 flex items-center justify-between shadow-sm transition-colors ${
+        isLight ? 'bg-white border-slate-200' : 'bg-slate-900 border-slate-800'
+      }`}>
         <div className="flex items-center gap-2.5">
           <div className="w-9 h-9 rounded-full bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center">
-            <Radio className="w-5 h-5 text-emerald-400 animate-pulse" />
+            <Radio className="w-5 h-5 text-emerald-500 animate-pulse" />
           </div>
           <div>
-            <h2 className="text-base font-bold text-white leading-tight">Field Dispatch Mobile</h2>
-            <p className="text-[11px] text-emerald-400 font-medium flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> GPS Live Tracking Active
+            <h2 className={`text-base font-bold leading-tight ${isLight ? 'text-slate-900' : 'text-white'}`}>Field Dispatch Mobile</h2>
+            <p className="text-[11px] text-emerald-600 font-medium flex items-center gap-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> GPS Live Tracking Active
             </p>
           </div>
         </div>
         <button 
           onClick={fetchDispatches}
-          className="p-2 bg-slate-800 rounded-full text-slate-300 hover:text-white"
+          className={`p-2 rounded-full transition-colors ${
+            isLight ? 'bg-slate-100 text-slate-600 hover:text-slate-900' : 'bg-slate-800 text-slate-300 hover:text-white'
+          }`}
         >
           <RefreshCw className="w-4 h-4" />
         </button>
       </div>
 
       {actionMessage && (
-        <div className="m-3 p-3 bg-emerald-950/90 border border-emerald-500/50 text-emerald-200 text-xs rounded-lg flex items-center gap-2">
-          <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+        <div className={`m-3 p-3 border text-xs rounded-lg flex items-center gap-2 ${
+          isLight ? 'bg-emerald-50 border-emerald-300 text-emerald-800' : 'bg-emerald-950/90 border-emerald-500/50 text-emerald-200'
+        }`}>
+          <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
           <span>{actionMessage.text}</span>
         </div>
       )}
@@ -118,29 +128,35 @@ export default function FieldDispatchMobile() {
       {activeDispatch ? (
         <div className="p-4 space-y-4 flex-1 overflow-y-auto">
           {/* Status Badge & Risk */}
-          <div className="bg-gradient-to-br from-rose-950/80 to-slate-900 border border-rose-600/50 p-4 rounded-xl shadow-lg">
+          <div className={`p-4 rounded-xl border shadow-md transition-colors ${
+            isLight
+              ? 'bg-rose-50/80 border-rose-200 text-slate-900'
+              : 'bg-gradient-to-br from-rose-950/80 to-slate-900 border-rose-600/50 text-white'
+          }`}>
             <div className="flex items-center justify-between mb-2">
-              <span className="px-2.5 py-1 bg-rose-500 text-white font-extrabold text-[10px] tracking-wider uppercase rounded-full animate-pulse">
+              <span className="px-2.5 py-1 bg-rose-500 text-white font-extrabold text-[10px] tracking-wider uppercase rounded-full animate-pulse shadow-sm">
                 HIGH PRIORITY CASHOUT ALERT
               </span>
-              <span className="text-xs font-mono text-slate-400">{activeDispatch.id}</span>
+              <span className={`text-xs font-mono ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>{activeDispatch.id}</span>
             </div>
-            <h3 className="text-lg font-bold text-white">
+            <h3 className={`text-lg font-bold ${isLight ? 'text-slate-900' : 'text-white'}`}>
               Target Hotspot: {activeDispatch.target_district} District
             </h3>
-            <p className="text-xs text-rose-300/90 mt-1 flex items-center gap-1">
+            <p className={`text-xs mt-1 flex items-center gap-1 ${isLight ? 'text-rose-700' : 'text-rose-300/90'}`}>
               <Clock className="w-3.5 h-3.5" /> Dispatched {new Date(activeDispatch.sent_at || Date.now()).toLocaleTimeString()}
             </p>
-            <div className="mt-3 pt-3 border-t border-rose-900/40 flex justify-between text-xs text-slate-300">
+            <div className={`mt-3 pt-3 border-t flex justify-between text-xs ${
+              isLight ? 'border-rose-200 text-slate-700' : 'border-rose-900/40 text-slate-300'
+            }`}>
               <div>
-                <span className="text-slate-400 block text-[10px]">FRAUD EXPOSURE</span>
-                <span className="font-bold text-emerald-400">
+                <span className={`block text-[10px] ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>FRAUD EXPOSURE</span>
+                <span className={`font-black ${isLight ? 'text-emerald-700' : 'text-emerald-400'}`}>
                   ₹{activeDispatch.package?.complaint?.fraud_amount?.toLocaleString('en-IN') || '145,000'}
                 </span>
               </div>
               <div>
-                <span className="text-slate-400 block text-[10px]">FRAUD TYPE</span>
-                <span className="font-medium text-amber-300">
+                <span className={`block text-[10px] ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>FRAUD TYPE</span>
+                <span className={`font-semibold ${isLight ? 'text-amber-700' : 'text-amber-300'}`}>
                   {activeDispatch.package?.complaint?.fraud_method || 'Vishing Fraud'}
                 </span>
               </div>
@@ -148,8 +164,12 @@ export default function FieldDispatchMobile() {
           </div>
 
           {/* Quick Field Actions (1-Tap Resolution) */}
-          <div className="bg-slate-900 border border-slate-800 p-4 rounded-xl space-y-2">
-            <h4 className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Field Response Action</h4>
+          <div className={`p-4 rounded-xl border space-y-2 transition-colors ${
+            isLight ? 'bg-white border-slate-200 shadow-sm' : 'bg-slate-900 border-slate-800'
+          }`}>
+            <h4 className={`text-xs font-semibold uppercase tracking-wider ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
+              Field Response Action
+            </h4>
             <div className="grid grid-cols-2 gap-2">
               <button
                 onClick={() => handleUpdateStatus(activeDispatch.id, 'ACKNOWLEDGED')}
@@ -167,13 +187,17 @@ export default function FieldDispatchMobile() {
           </div>
 
           {/* Micro-Cluster Candidate ATM Locations & GPS Deep Link */}
-          <div className="bg-slate-900 border border-slate-800 p-4 rounded-xl space-y-3">
+          <div className={`p-4 rounded-xl border space-y-3 transition-colors ${
+            isLight ? 'bg-white border-slate-200 shadow-sm' : 'bg-slate-900 border-slate-800'
+          }`}>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <MapPin className="w-4 h-4 text-emerald-400" />
-                <h4 className="text-sm font-bold text-white">Target Candidate ATMs</h4>
+                <MapPin className="w-4 h-4 text-emerald-500" />
+                <h4 className={`text-sm font-bold ${isLight ? 'text-slate-900' : 'text-white'}`}>Target Candidate ATMs</h4>
               </div>
-              <span className="text-[10px] bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded border border-emerald-500/30">
+              <span className={`text-[10px] px-2 py-0.5 rounded border ${
+                isLight ? 'bg-emerald-50 text-emerald-800 border-emerald-200' : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
+              }`}>
                 DBSCAN Micro-Cluster
               </span>
             </div>
@@ -182,14 +206,16 @@ export default function FieldDispatchMobile() {
               {atms.map((atm, idx) => {
                 const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${atm.lat},${atm.lon}`;
                 return (
-                  <div key={idx} className="bg-slate-800/80 border border-slate-700/60 p-3 rounded-lg flex items-center justify-between gap-3">
+                  <div key={idx} className={`p-3 rounded-lg border flex items-center justify-between gap-3 ${
+                    isLight ? 'bg-slate-50 border-slate-200' : 'bg-slate-800/80 border-slate-700/60'
+                  }`}>
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2">
-                        <span className="text-xs font-extrabold text-blue-400">{atm.bank}</span>
-                        <span className="text-[10px] font-mono text-slate-400">({atm.atm_id})</span>
+                        <span className={`text-xs font-extrabold ${isLight ? 'text-blue-700' : 'text-blue-400'}`}>{atm.bank}</span>
+                        <span className={`text-[10px] font-mono ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>({atm.atm_id})</span>
                       </div>
-                      <p className="text-xs text-slate-300 truncate mt-0.5">{atm.address}</p>
-                      <p className="text-[10px] font-mono text-slate-400 mt-0.5">
+                      <p className={`text-xs truncate mt-0.5 ${isLight ? 'text-slate-700' : 'text-slate-300'}`}>{atm.address}</p>
+                      <p className={`text-[10px] font-mono mt-0.5 ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
                         Coords: {atm.lat}, {atm.lon}
                       </p>
                     </div>
@@ -197,7 +223,7 @@ export default function FieldDispatchMobile() {
                       href={mapsUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="shrink-0 flex items-center gap-1 bg-emerald-600 hover:bg-emerald-500 text-white text-xs px-3 py-2 rounded-lg font-semibold transition"
+                      className="shrink-0 flex items-center gap-1 bg-emerald-600 hover:bg-emerald-500 text-white text-xs px-3 py-2 rounded-lg font-semibold transition shadow-sm"
                     >
                       <Navigation className="w-3.5 h-3.5" /> Navigate
                     </a>
@@ -208,16 +234,22 @@ export default function FieldDispatchMobile() {
           </div>
         </div>
       ) : (
-        <div className="p-8 text-center text-slate-400">
-          <Shield className="w-12 h-12 text-slate-600 mx-auto mb-3" />
+        <div className={`p-8 text-center ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
+          <Shield className={`w-12 h-12 mx-auto mb-3 ${isLight ? 'text-slate-400' : 'text-slate-600'}`} />
           <p>No active field dispatches for your current jurisdiction.</p>
         </div>
       )}
 
       {/* Emergency Hotline Footer */}
-      <div className="bg-slate-900 border-t border-slate-800 p-3 text-center">
-        <button className="w-full bg-rose-600/20 border border-rose-500/40 hover:bg-rose-600/30 text-rose-300 py-2 rounded-lg text-xs font-bold flex items-center justify-center gap-2">
-          <PhoneCall className="w-4 h-4 text-rose-400" /> Emergency Cyber Cell Control Room: 1930
+      <div className={`border-t p-3 text-center transition-colors ${
+        isLight ? 'bg-slate-50 border-slate-200' : 'bg-slate-900 border-slate-800'
+      }`}>
+        <button className={`w-full py-2 rounded-lg text-xs font-bold flex items-center justify-center gap-2 border transition ${
+          isLight
+            ? 'bg-rose-50 border-rose-200 text-rose-800 hover:bg-rose-100'
+            : 'bg-rose-600/20 border-rose-500/40 hover:bg-rose-600/30 text-rose-300'
+        }`}>
+          <PhoneCall className="w-4 h-4 text-rose-500" /> Emergency Cyber Cell Control Room: 1930
         </button>
       </div>
     </div>

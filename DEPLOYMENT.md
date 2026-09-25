@@ -9,13 +9,13 @@ This project includes automated workflows and infrastructure blueprints to deplo
 The repository includes a GitHub Actions workflow: [`.github/workflows/deploy-pages.yml`](.github/workflows/deploy-pages.yml).
 
 ### Steps to activate GitHub Pages:
-1. Open your repository on GitHub: [https://github.com/AdithyaKS2006/cyber_cast](https://github.com/AdithyaKS2006/cyber_cast)
+1. Open your repository on GitHub: [https://github.com/AdithyaKS2006/Cyber_Cast2](https://github.com/AdithyaKS2006/Cyber_Cast2)
 2. Go to **Settings** → **Pages** (under "Code and automation").
 3. Under **Build and deployment** → **Source**, select **GitHub Actions**.
 4. Push to `main` or trigger the workflow manually from **Actions** → **Deploy Frontend to GitHub Pages** → **Run workflow**.
 5. Your frontend will be live at:
    ```
-   https://AdithyaKS2006.github.io/cyber_cast/
+   https://AdithyaKS2006.github.io/Cyber_Cast2/
    ```
 
 ---
@@ -29,7 +29,7 @@ The repository contains [`render.yaml`](render.yaml) which provisions both servi
 ### Deploying with Render:
 1. Log in to [Render.com](https://render.com).
 2. Click **New +** → **Blueprint**.
-3. Connect your GitHub repository: `AdithyaKS2006/cyber_cast`.
+3. Connect your GitHub repository: `AdithyaKS2006/Cyber_Cast2`.
 4. Render will read `render.yaml` and provision both backend and frontend automatically.
 
 ---
@@ -40,8 +40,8 @@ The backend is packaged into a production Docker image via [`.github/workflows/d
 
 ### Pull & Run Container Anywhere:
 ```bash
-docker pull ghcr.io/adithyaks2006/cyber_cast/backend:latest
-docker run -d -p 8000:8000 ghcr.io/adithyaks2006/cyber_cast/backend:latest
+docker pull ghcr.io/adithyaks2006/cyber_cast2/backend:latest
+docker run -d -p 8000:8000 ghcr.io/adithyaks2006/cyber_cast2/backend:latest
 ```
 
 ---

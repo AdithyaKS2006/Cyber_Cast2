@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react';
 import {
   ChevronLeft, Zap, Clock, CheckCircle, AlertTriangle,
   ArrowRight, ExternalLink, Loader2, MapPin, Building2,
-  DollarSign, Calendar, User, FileText, Network, LayoutDashboard
+  DollarSign, Calendar, User, FileText, Network, LayoutDashboard,
+  FolderLock, Shield
 } from 'lucide-react';
+
 import apiClient from '../../utils/apiClient';
 import MoneyTrailGraph from '../intelligence/MoneyTrailGraph';
 
@@ -34,8 +36,8 @@ const InfoRow = ({ icon: Icon, label, value }) => (
       <Icon className="w-3.5 h-3.5 text-orange-400" />
     </div>
     <div>
-      <p className="text-[8px] font-black text-zinc-600 uppercase tracking-widest">{label}</p>
-      <p className="text-[11px] font-bold text-white">{typeof value === 'object' && value !== null ? (value.name || value.label || JSON.stringify(value)) : String(value ?? '—')}</p>
+      <p className="text-[9px] font-black text-zinc-500 uppercase tracking-widest">{label}</p>
+      <p className="text-[11px] font-bold">{typeof value === 'object' && value !== null ? (value.name || value.label || JSON.stringify(value)) : String(value ?? '—')}</p>
     </div>
   </div>
 );
@@ -158,17 +160,17 @@ const ComplaintDetail = ({ complaintId, navigate }) => {
   const currentStatusIdx = STATUS_ORDER.indexOf(complaint?.status);
 
   if (loading) return (
-    <div className="flex items-center justify-center min-h-screen" style={{ background: '#000' }}>
+    <div className="flex items-center justify-center min-h-screen">
       <Loader2 className="w-8 h-8 text-orange-400 animate-spin" />
     </div>
   );
 
   if (error) return (
-    <div className="flex flex-col items-center justify-center min-h-screen gap-4" style={{ background: '#000' }}>
+    <div className="flex flex-col items-center justify-center min-h-screen gap-4">
       <AlertTriangle className="w-12 h-12 text-red-400" />
-      <p className="text-white font-bold uppercase text-sm">{typeof error === 'object' ? JSON.stringify(error) : String(error)}</p>
+      <p className="font-bold uppercase text-sm">{typeof error === 'object' ? JSON.stringify(error) : String(error)}</p>
       <button onClick={() => navigate('complaints')}
-              className="px-4 py-2 rounded-xl bg-zinc-900 text-zinc-400 text-[10px] font-black uppercase hover:text-white transition-colors">
+              className="px-4 py-2 rounded-xl cc-card-bg text-zinc-400 text-[10px] font-black uppercase hover:text-white transition-colors">
         ← Back to Complaints
       </button>
     </div>
@@ -221,8 +223,18 @@ const ComplaintDetail = ({ complaintId, navigate }) => {
               <ExternalLink className="w-3.5 h-3.5" /> View Prediction
             </button>
           )}
+
+          <button onClick={() => navigate(`evidence/${complaintId}`)}
+                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-indigo-500/40 text-[10px] font-black uppercase text-indigo-400 hover:bg-indigo-500/10 transition-colors">
+            <FolderLock className="w-3.5 h-3.5" /> Evidence Locker
+          </button>
+          <button onClick={() => navigate('freeze-ops')}
+                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-emerald-500/40 text-[10px] font-black uppercase text-emerald-400 hover:bg-emerald-500/10 transition-colors">
+            <Shield className="w-3.5 h-3.5" /> Freeze Queue
+          </button>
         </div>
       </div>
+
 
       {/* ── Navigation Tabs ────────────────────────────────────────────── */}
       <div className="flex items-center gap-2 border-b border-zinc-800/80 pb-3">
@@ -264,8 +276,7 @@ const ComplaintDetail = ({ complaintId, navigate }) => {
         {/* Left column */}
         <div className="lg:col-span-2 space-y-6">
           {/* Victim & Fraud info */}
-          <div className="rounded-2xl border border-zinc-800/60 p-6 space-y-6"
-               style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(12px)' }}>
+          <div className="cc-card-bg rounded-2xl border border-zinc-800/60 p-6 space-y-6">
             <h2 className="text-[10px] font-black text-orange-400 uppercase tracking-widest">Complaint Details</h2>
             <div className="grid grid-cols-2 gap-5">
               <InfoRow icon={User}       label="Victim Name"    value={complaint?.victim_name} />
@@ -283,8 +294,7 @@ const ComplaintDetail = ({ complaintId, navigate }) => {
           </div>
 
           {/* Transaction Chain Visualization */}
-          <div className="rounded-2xl border border-zinc-800/60 p-6 space-y-4"
-               style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(12px)' }}>
+          <div className="cc-card-bg rounded-2xl border border-zinc-800/60 p-6 space-y-4">
             <h2 className="text-[10px] font-black text-orange-400 uppercase tracking-widest">
               Transaction Chain ({hops.length} hop{hops.length !== 1 ? 's' : ''})
             </h2>
@@ -339,8 +349,7 @@ const ComplaintDetail = ({ complaintId, navigate }) => {
         {/* Right column: timeline + prediction summary */}
         <div className="space-y-6">
           {/* Status Timeline */}
-          <div className="rounded-2xl border border-zinc-800/60 p-6 space-y-4"
-               style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(12px)' }}>
+          <div className="cc-card-bg rounded-2xl border border-zinc-800/60 p-6 space-y-4">
             <h2 className="text-[10px] font-black text-orange-400 uppercase tracking-widest">Status Timeline</h2>
             <div className="space-y-0">
               {TIMELINE_STEPS.map((ts, i) => {

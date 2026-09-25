@@ -42,8 +42,7 @@ const StatCard = ({ icon: Icon, label, value, sub, color, trend, delay = 0, onCl
     animate={{ opacity: 1, y: 0 }}
     transition={{ delay, duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
     onClick={onClick}
-    className="p-5 rounded-2xl border border-zinc-800/60 space-y-3 relative overflow-hidden touch-feedback cursor-pointer hover:border-orange-500/40 hover:scale-[1.02] transition-all hover:shadow-[0_0_24px_rgba(249,115,22,0.15)] group"
-    style={{ background: 'rgba(0,0,0,0.72)', backdropFilter: 'blur(16px)' }}
+    className="cc-card-bg p-5 rounded-2xl border border-zinc-800/60 space-y-3 relative overflow-hidden touch-feedback cursor-pointer hover:border-orange-500/40 hover:scale-[1.02] transition-all hover:shadow-[0_0_24px_rgba(249,115,22,0.15)] group"
   >
     <div
       className="absolute inset-0 opacity-[0.06] group-hover:opacity-[0.14] transition-opacity pointer-events-none"
@@ -334,10 +333,9 @@ const Dashboard = ({ navigate }) => {
             <button
               onClick={fetchAll}
               disabled={loading}
-              className="p-2.5 rounded-xl border border-zinc-800 text-zinc-500
+              className="cc-card-bg p-2.5 rounded-xl border border-zinc-800 text-zinc-500
                          hover:text-orange-400 hover:border-orange-500/30 transition-all
                          active:scale-95 flex-shrink-0"
-              style={{ background: 'rgba(0,0,0,0.6)' }}
               aria-label="Refresh dashboard"
             >
               <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
@@ -409,8 +407,7 @@ const Dashboard = ({ navigate }) => {
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              className="rounded-2xl border border-zinc-800/60 overflow-hidden"
-              style={{ background: 'rgba(0,0,0,0.72)', backdropFilter: 'blur(16px)' }}
+              className="cc-card-bg rounded-2xl border border-zinc-800/60 overflow-hidden"
             >
               <div className="p-4 flex items-center justify-between"
                    style={{ borderBottom: '1px solid rgba(249,115,22,0.08)' }}>
@@ -493,8 +490,7 @@ const Dashboard = ({ navigate }) => {
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
-              className="rounded-2xl border border-zinc-800/60 p-4 sm:p-5 space-y-4 overflow-hidden"
-              style={{ background: 'rgba(0,0,0,0.72)', backdropFilter: 'blur(16px)' }}
+              className="cc-card-bg rounded-2xl border border-zinc-800/60 p-4 sm:p-5 space-y-4 overflow-hidden"
             >
               <div className="flex items-center justify-between">
                 <h2 className="text-[10px] font-black text-orange-400 uppercase tracking-widest">
@@ -535,8 +531,7 @@ const Dashboard = ({ navigate }) => {
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.15 }}
-              className="rounded-2xl border border-zinc-800/60 p-4 sm:p-5 space-y-3"
-              style={{ background: 'rgba(0,0,0,0.72)', backdropFilter: 'blur(16px)' }}
+              className="cc-card-bg rounded-2xl border border-zinc-800/60 p-4 sm:p-5 space-y-3"
             >
               <div className="flex items-center justify-between">
                 <h2 className="text-[10px] font-black text-orange-400 uppercase tracking-widest">
@@ -621,8 +616,7 @@ const Dashboard = ({ navigate }) => {
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.25 }}
-              className="rounded-2xl border border-zinc-800/60 p-4 sm:p-5 space-y-3"
-              style={{ background: 'rgba(0,0,0,0.72)', backdropFilter: 'blur(16px)' }}
+              className="cc-card-bg rounded-2xl border border-zinc-800/60 p-4 sm:p-5 space-y-3"
             >
               <div>
                 <div className="flex items-center justify-between">

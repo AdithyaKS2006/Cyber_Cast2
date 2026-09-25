@@ -3,7 +3,9 @@ import { motion } from 'framer-motion';
 import {
   Search, Plus, Upload, ChevronRight,
   ClipboardList, AlertTriangle, X, RefreshCw,
+  FolderLock, ShieldCheck, MapPin, Send
 } from 'lucide-react';
+
 import apiClient from '../../utils/apiClient';
 import Skeleton from '../ui/Skeleton';
 import EmptyState from '../ui/EmptyState';
@@ -128,6 +130,7 @@ const ComplaintsDashboard = ({ navigate }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showCSV, setShowCSV] = useState(false);
+  const isLight = document.documentElement.classList.contains('light-mode');
 
   // Filters
   const [search, setSearch] = useState('');
@@ -174,7 +177,7 @@ const ComplaintsDashboard = ({ navigate }) => {
 
   return (
     <PageTransition>
-    <div className="min-h-screen p-4 sm:p-6 space-y-4 sm:space-y-6" style={{ background: 'linear-gradient(135deg, #000000, #080808)' }}>
+    <div className="min-h-screen p-4 sm:p-6 space-y-4 sm:space-y-6" style={{ background: isLight ? 'transparent' : 'linear-gradient(135deg, #000000, #080808)' }}>
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -191,7 +194,9 @@ const ComplaintsDashboard = ({ navigate }) => {
           <button onClick={() => setShowCSV(true)}
                   className="flex items-center gap-1.5 px-3 sm:px-4 py-2.5 rounded-xl text-[9px] sm:text-[10px]
                              font-black uppercase text-orange-400 hover:border-orange-500/50 transition-all active:scale-95 touch-feedback"
-                  style={{ background: 'rgba(0,0,0,0.6)', border: '1px solid rgba(249,115,22,0.2)' }}>
+                  style={isLight
+                    ? { background: 'rgba(255,255,255,0.9)', border: '1px solid rgba(249,115,22,0.25)' }
+                    : { background: 'rgba(0,0,0,0.6)', border: '1px solid rgba(249,115,22,0.2)' }}>
             <Upload className="w-3.5 h-3.5" />
             <span className="hidden sm:inline">Bulk Import</span>
           </button>
@@ -213,17 +218,21 @@ const ComplaintsDashboard = ({ navigate }) => {
             value={search}
             onChange={e => setSearch(e.target.value)}
             placeholder="Search victim name or complaint #…"
-            className="w-full pl-9 pr-4 py-2.5 rounded-xl text-[11px] text-white placeholder:text-zinc-600
+            className="w-full pl-9 pr-4 py-2.5 rounded-xl text-[11px] placeholder:text-zinc-600
                        focus:outline-none transition-colors"
-            style={{ background: 'rgba(0,0,0,0.6)', border: '1px solid rgba(39,39,42,0.8)' }}
+            style={isLight
+              ? { background: 'rgba(255,255,255,0.95)', border: '1px solid rgba(99,102,241,0.18)', color: '#1e293b' }
+              : { background: 'rgba(0,0,0,0.6)', border: '1px solid rgba(39,39,42,0.8)', color: '#fff' }}
           />
         </div>
         <div className="flex gap-2">
           <select
             value={statusFilter}
             onChange={e => setStatusFilter(e.target.value)}
-            className="flex-1 sm:flex-none px-3 py-2.5 rounded-xl text-[11px] text-zinc-300 focus:outline-none transition-colors"
-            style={{ background: 'rgba(0,0,0,0.6)', border: '1px solid rgba(39,39,42,0.8)' }}
+            className="flex-1 sm:flex-none px-3 py-2.5 rounded-xl text-[11px] focus:outline-none transition-colors"
+            style={isLight
+              ? { background: 'rgba(255,255,255,0.95)', border: '1px solid rgba(99,102,241,0.18)', color: '#1e293b' }
+              : { background: 'rgba(0,0,0,0.6)', border: '1px solid rgba(39,39,42,0.8)', color: '#d4d4d8' }}
           >
             <option value="">All Statuses</option>
             {Object.entries(STATUS_META).map(([k, v]) => (
@@ -234,7 +243,9 @@ const ComplaintsDashboard = ({ navigate }) => {
             onClick={fetchComplaints}
             disabled={loading}
             className="p-2.5 rounded-xl text-zinc-500 hover:text-orange-400 transition-all active:scale-95"
-            style={{ background: 'rgba(0,0,0,0.6)', border: '1px solid rgba(39,39,42,0.8)' }}
+            style={isLight
+              ? { background: 'rgba(255,255,255,0.95)', border: '1px solid rgba(99,102,241,0.18)' }
+              : { background: 'rgba(0,0,0,0.6)', border: '1px solid rgba(39,39,42,0.8)' }}
           >
             <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
           </button>
@@ -244,8 +255,10 @@ const ComplaintsDashboard = ({ navigate }) => {
       {/* Table */}
       <motion.div
         initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
-        className="rounded-2xl overflow-hidden border border-zinc-800/60"
-        style={{ background: 'rgba(0,0,0,0.72)', backdropFilter: 'blur(16px)' }}
+        className="rounded-2xl overflow-hidden border"
+        style={isLight
+          ? { background: 'rgba(255,255,255,0.92)', backdropFilter: 'blur(16px)', border: '1px solid rgba(99,102,241,0.12)', boxShadow: '0 4px 24px rgba(99,102,241,0.07)' }
+          : { background: 'rgba(0,0,0,0.72)', backdropFilter: 'blur(16px)', borderColor: 'rgba(63,63,70,0.6)' }}
       >
         {error ? (
           <ErrorState message="Failed to load complaints" detail={error} onRetry={fetchComplaints} />
@@ -263,7 +276,7 @@ const ComplaintsDashboard = ({ navigate }) => {
             <table className="w-full">
               <thead>
                 <tr style={{ borderBottom: '1px solid rgba(249,115,22,0.10)' }}>
-                  {['#', 'Date', 'Victim', 'Amount', 'Method', 'Status', 'Priority', ''].map(h => (
+                  {['#', 'Date', 'Victim', 'Amount', 'Method', 'Status', 'Priority', 'Actions', ''].map(h => (
                     <th key={h} className="px-4 py-3 text-left text-[9px] font-black uppercase tracking-widest text-zinc-600">
                       {h}
                     </th>
@@ -272,14 +285,14 @@ const ComplaintsDashboard = ({ navigate }) => {
               </thead>
               <tbody>
                 {loading
-                  ? Array.from({ length: 8 }, (_, i) => <Skeleton.Row key={i} cols={8} />)
+                  ? Array.from({ length: 8 }, (_, i) => <Skeleton.Row key={i} cols={9} />)
                   : complaints.map((c, idx) => (
                     <tr
                       key={c.id}
                       onClick={() => c.id && navigate(`complaints/${c.id}`)}
                       className="cursor-pointer transition-colors hover:bg-orange-500/[0.04]
                                  active:bg-orange-500/10 group touch-feedback"
-                      style={{ borderBottom: '1px solid rgba(255,255,255,0.03)' }}
+                      style={{ borderBottom: isLight ? '1px solid rgba(99,102,241,0.08)' : '1px solid rgba(255,255,255,0.03)' }}
                     >
                       <td className="px-4 py-3 text-[10px] font-black text-orange-400 whitespace-nowrap">
                         {c.complaint_number || `#${idx + 1}`}
@@ -288,10 +301,10 @@ const ComplaintsDashboard = ({ navigate }) => {
                         {formatDate(c.complaint_timestamp)}
                       </td>
                       <td className="px-4 py-3">
-                        <div className="text-[11px] font-bold text-white">{c.victim_name || '—'}</div>
-                        <div className="text-[9px] text-zinc-600">{c.victim_phone || ''}</div>
+                        <div className={`text-[11px] font-bold ${isLight ? 'text-slate-800' : 'text-white'}`}>{c.victim_name || '—'}</div>
+                        <div className="text-[9px] text-zinc-500">{c.victim_phone || ''}</div>
                       </td>
-                      <td className="px-4 py-3 text-[11px] font-black text-white whitespace-nowrap">
+                      <td className={`px-4 py-3 text-[11px] font-black whitespace-nowrap ${isLight ? 'text-slate-800' : 'text-white'}`}>
                         {formatAmount(c.fraud_amount)}
                       </td>
                       <td className="hidden md:table-cell px-4 py-3 text-[10px] text-zinc-400 uppercase font-bold">
@@ -299,6 +312,31 @@ const ComplaintsDashboard = ({ navigate }) => {
                       </td>
                       <td className="px-4 py-3"><StatusBadge status={c.status} /></td>
                       <td className="hidden sm:table-cell px-4 py-3"><PriorityBadge priority={c.priority} /></td>
+                      <td className="px-4 py-3" onClick={e => e.stopPropagation()}>
+                        <div className="flex items-center gap-1.5">
+                          <button
+                            onClick={() => navigate(`evidence/${c.id}`)}
+                            title="Open Evidence Locker"
+                            className="p-1.5 rounded-lg bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 transition"
+                          >
+                            <FolderLock className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            onClick={() => navigate('predictions/heatmap')}
+                            title="View ATM Cash-Out Heatmap"
+                            className="p-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 transition"
+                          >
+                            <MapPin className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            onClick={() => navigate('freeze-ops')}
+                            title="Freeze Mule Account"
+                            className="p-1.5 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 transition"
+                          >
+                            <ShieldCheck className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </td>
                       <td className="px-4 py-3">
                         <ChevronRight className="w-4 h-4 text-zinc-700 group-hover:text-orange-400 transition-colors" />
                       </td>
@@ -306,6 +344,7 @@ const ComplaintsDashboard = ({ navigate }) => {
                   ))
                 }
               </tbody>
+
             </table>
           </div>
         )}

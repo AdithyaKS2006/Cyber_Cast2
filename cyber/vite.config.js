@@ -35,8 +35,25 @@ export default defineConfig({
         '**/staticfiles/**',
         '**/.git/**',
         '**/ml_models/saved_models/**',
-        '**/ml_models/training_data/**',
       ],
+    },
+  },
+  preview: {
+    host: true,
+    port: 3000,
+    strictPort: true,
+    proxy: {
+      '/api': {
+        target: 'http://127.0.0.1:8000',
+        changeOrigin: true,
+        secure: false,
+      },
+      '/ws': {
+        target: 'ws://127.0.0.1:8000',
+        ws: true,
+        changeOrigin: true,
+        secure: false,
+      },
     },
   },
 });

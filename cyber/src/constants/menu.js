@@ -1,70 +1,48 @@
 import {
   LayoutDashboard,
   ClipboardList,
-  MapPin,
-  Bell,
-  BarChart2,
-  MessageCircle,
-  Settings,
   PlusCircle,
-  List,
   Map,
-  Activity,
-  Crosshair,
-  BookOpen,
-  ShieldAlert,
-  Users,
-  Network,
-  Zap,
-  Search,
+  Bell,
   ShieldCheck,
-  Globe,
-  Radio,
+  FolderLock,
   Smartphone,
-  Terminal,
 } from 'lucide-react';
+
+const ALL_ROLES = ['Analyst', 'Validator', 'Administrator', 'Operator', 'Officer', 'Supervisor'];
 
 export const ALL_MENU_GROUPS = [
   {
     title: 'MAIN',
     items: [
-      { id: 'dashboard',      icon: LayoutDashboard, label: 'Dashboard',      roles: ['Analyst','Validator','Administrator','Operator'] },
+      { id: 'dashboard', icon: LayoutDashboard, label: 'Dashboard', roles: ALL_ROLES },
     ],
   },
   {
-    title: 'INVESTIGATIONS',
+    title: 'COMPLAINTS',
     items: [
-      { id: 'complaints',        icon: ClipboardList, label: 'All Complaints',  roles: ['Analyst','Validator','Administrator','Operator'] },
-      { id: 'complaints/new',    icon: PlusCircle,    label: 'New Complaint',   roles: ['Analyst','Validator','Administrator','Operator'] },
-      { id: 'mule-network',      icon: Network,       label: 'Mule Network',    roles: ['Analyst','Validator','Administrator','Operator'] },
+      { id: 'complaints',     icon: ClipboardList, label: 'All Complaints', roles: ALL_ROLES },
+      { id: 'complaints/new', icon: PlusCircle,     label: 'New Complaint',  roles: ALL_ROLES },
     ],
   },
-
   {
-    title: 'PREDICTIONS',
+    title: 'LIVE MAP',
     items: [
-      { id: 'predictions',        icon: Activity,  label: 'Active Predictions', roles: ['Analyst','Validator','Administrator','Operator'] },
-      { id: 'predictions/heatmap',icon: Map,       label: 'Heatmap',            roles: ['Analyst','Validator','Administrator','Operator'] },
+      { id: 'predictions/heatmap', icon: Map, label: 'Cash-Out Heatmap', roles: ALL_ROLES },
     ],
   },
   {
     title: 'OPERATIONS',
     items: [
-      { id: 'alerts',          icon: Bell,           label: 'Alert Center',       roles: ['Analyst','Validator','Administrator','Operator'] },
-      { id: 'freeze-ops',      icon: ShieldCheck,    label: 'Freeze Ops',         roles: ['Analyst','Validator','Administrator','Operator'] },
-      { id: 'ingest-alerts',   icon: Zap,            label: 'Ingest Feed',        roles: ['Analyst','Validator','Administrator','Operator'] },
-      { id: 'lea-dispatches',  icon: Crosshair,      label: 'Incoming Dispatches',roles: ['Analyst','Validator','Administrator','Operator'] },
-      { id: 'gateway-monitor', icon: Radio,          label: 'Gateway Monitor',    roles: ['Analyst','Validator','Administrator','Operator'] },
-      { id: 'field-mobile',    icon: Smartphone,     label: 'Field Mobile Mode',  roles: ['Analyst','Validator','Administrator','Operator'] },
-      { id: 'analytics',       icon: BarChart2,      label: 'Analytics',          roles: ['Analyst','Validator','Administrator','Operator'] },
-      { id: 'ai-advisor',      icon: MessageCircle,  label: 'AI Advisor',         roles: ['Analyst','Validator','Administrator','Operator'] },
-      { id: 'simulator',       icon: Terminal,       label: 'Syndicate Simulator',roles: ['Analyst','Validator','Administrator','Operator'] },
+      { id: 'alerts',         icon: Bell,       label: 'Alert Center',    roles: ALL_ROLES },
+      { id: 'freeze-ops',     icon: ShieldCheck, label: 'Freeze Queue',   roles: ALL_ROLES },
+      { id: 'evidence-locker',icon: FolderLock,  label: 'Evidence Locker',roles: ALL_ROLES },
     ],
   },
   {
-    title: 'SYSTEM',
+    title: 'FIELD',
     items: [
-      { id: 'settings',       icon: Settings,        label: 'Settings', roles: ['Analyst','Validator','Administrator','Operator'] },
+      { id: 'field-mobile', icon: Smartphone, label: 'Officer View', roles: ALL_ROLES },
     ],
   },
 ];

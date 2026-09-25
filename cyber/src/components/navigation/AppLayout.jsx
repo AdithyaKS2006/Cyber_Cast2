@@ -98,7 +98,9 @@ const AppLayout = ({
       <GlobalStyles />
       
       <Toaster position="top-right" toastOptions={{
-        style: { background: '#080808', color: '#f97316', border: '1px solid rgba(249,115,22,0.3)', fontSize: '12px', fontWeight: 'bold' }
+        style: theme === 'light'
+          ? { background: '#ffffff', color: '#1e293b', border: '1px solid rgba(249,115,22,0.3)', fontSize: '12px', fontWeight: 'bold', boxShadow: '0 4px 20px rgba(99,102,241,0.12)' }
+          : { background: '#080808', color: '#f97316', border: '1px solid rgba(249,115,22,0.3)', fontSize: '12px', fontWeight: 'bold' }
       }} />
 
       {/* Mobile Hamburger overlay */}
@@ -140,7 +142,7 @@ const AppLayout = ({
           <main className="flex-1 flex flex-col min-w-0 min-h-0 overflow-hidden">
             
             {/* Breadcrumbs & NLQ Quick bar */}
-            <div className="px-6 py-4 border-b border-zinc-800/60 bg-black/20 flex items-center justify-between flex-shrink-0">
+            <div className={`px-6 py-4 border-b flex items-center justify-between flex-shrink-0 ${theme === 'light' ? 'border-indigo-100 bg-white/60 backdrop-blur-sm' : 'border-zinc-800/60 bg-black/20'}`}>
               <Breadcrumbs path={activePage} />
               <div className="flex items-center gap-4">
                  <div className="flex items-center gap-2 mr-2">

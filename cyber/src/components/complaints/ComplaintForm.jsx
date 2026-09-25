@@ -317,8 +317,7 @@ const ComplaintForm = ({ navigate, initialData = {} }) => {
 
 
         {/* Form card */}
-        <div className="rounded-2xl border border-zinc-800/60 p-6 space-y-5"
-             style={{ background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(12px)' }}>
+        <div className="cc-card-bg rounded-2xl border border-zinc-800/60 p-6 space-y-5">
 
           {/* STEP 0: Victim Details */}
           {step === 0 && (

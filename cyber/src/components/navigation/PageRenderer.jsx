@@ -2,109 +2,103 @@ import React, { Suspense, lazy } from 'react';
 import ErrorBoundary from '../ui/ErrorBoundary';
 import { LoadingScreen } from '../ui/Common';
 
-// Lazy load pages for better performance
+// Core pages — only what serves the loop
+const CrimeCastDashboard    = lazy(() => import('../pages/Dashboard'));
+const ComplaintsDashboard   = lazy(() => import('../complaints/ComplaintsDashboard'));
+const ComplaintForm         = lazy(() => import('../complaints/ComplaintForm'));
+const ComplaintDetail       = lazy(() => import('../complaints/ComplaintDetail'));
+const PredictionMap         = lazy(() => import('../predictions/PredictionMap'));
+const PredictionDetail      = lazy(() => import('../predictions/PredictionDetail'));
+const AlertCenter           = lazy(() => import('../alerts/AlertCenter'));
+const FreezeOpsDashboard    = lazy(() => import('../freeze/FreezeOpsDashboard'));
+const EvidenceLocker        = lazy(() => import('../evidence/EvidenceLocker'));
+const FieldDispatchMobile   = lazy(() => import('../pages/FieldDispatchMobile'));
+const ProfilePage           = lazy(() => import('../pages/ProfilePage'));
+const ModelMetrics          = lazy(() => import('../pages/ModelMetrics'));
+const GatewayMonitor        = lazy(() => import('../pages/GatewayMonitor'));
+const MFASetupPage          = lazy(() => import('../pages/MFASetupPage'));
+const CrossJurisdictionRollup = lazy(() => import('../pages/CrossJurisdictionRollup'));
+const SyndicateSimulator    = lazy(() => import('../pages/SyndicateSimulator'));
+const AccessDeniedPage      = lazy(() => import('../pages/AccessDeniedPage'));
+const NotFoundPage          = lazy(() => import('../pages/NotFoundPage'));
 import LandingPage from '../pages/LandingPage';
-
-// Core CrimeCast pages
-// Core CrimeCast pages
-const CrimeCastDashboard = lazy(() => import('../pages/Dashboard'));
-const ProfilePage = lazy(() => import('../pages/ProfilePage'));
-const CyberGuru = lazy(() => import('../ai/CyberGuru'));
-const ModelMetrics = lazy(() => import('../pages/ModelMetrics'));
-const AnalyticsPage = lazy(() => import('../analytics/AnalyticsPage'));
-const GatewayMonitor = lazy(() => import('../pages/GatewayMonitor'));
-const FieldDispatchMobile = lazy(() => import('../pages/FieldDispatchMobile'));
-const SyndicateSimulator = lazy(() => import('../pages/SyndicateSimulator'));
-
-// CrimeCast Prediction Pipeline
-const ComplaintsDashboard = lazy(() => import('../complaints/ComplaintsDashboard'));
-const ComplaintForm = lazy(() => import('../complaints/ComplaintForm'));
-const ComplaintDetail = lazy(() => import('../complaints/ComplaintDetail'));
-const PredictionMap    = lazy(() => import('../predictions/PredictionMap'));
-const PredictionDetail = lazy(() => import('../predictions/PredictionDetail'));
-const AlertCenter = lazy(() => import('../alerts/AlertCenter'));
-const LEADispatchQueue = lazy(() => import('../alerts/LEADispatchQueue'));
-const FreezeOpsDashboard = lazy(() => import('../freeze/FreezeOpsDashboard'));
-const ProactiveAlertFeed = lazy(() => import('../ingest/ProactiveAlertFeed'));
-const MuleNetworkIntelligence = lazy(() => import('../intelligence/MuleNetworkIntelligence'));
-
-// Access Denied / 404 Pages
-const AccessDeniedPage = lazy(() => import('../pages/AccessDeniedPage'));
-const NotFoundPage = lazy(() => import('../pages/NotFoundPage'));
-
-const PAGE_ROLES = {
-  'dashboard': ['analyst','validator','administrator','operator','consumer','officer','supervisor'],
-  'guru': ['analyst','validator','administrator','operator','consumer','officer','supervisor'],
-  'analytics': ['analyst','validator','administrator','officer','supervisor'],
-  'profile': ['analyst','validator','administrator','operator','consumer','officer','supervisor'],
-  'complaints': ['analyst','validator','administrator','operator','officer','supervisor'],
-  'complaints/new': ['analyst','validator','administrator','operator','officer','supervisor'],
-  'mule-network': ['analyst','validator','administrator','operator','officer','supervisor'],
-  'intelligence/mule-network': ['analyst','validator','administrator','operator','officer','supervisor'],
-  'predictions': ['analyst','validator','administrator','operator','officer','supervisor'],
-  'predictions/heatmap': ['analyst','validator','administrator','operator','officer','supervisor'],
-  'alerts': ['analyst','validator','administrator','operator','officer','supervisor'],
-  'freeze-ops': ['analyst','validator','administrator','operator','officer','supervisor'],
-  'ingest-alerts': ['analyst','validator','administrator','operator','officer','supervisor'],
-  'lea-dispatches': ['analyst','validator','administrator','operator','officer','supervisor'],
-  'model-metrics': ['analyst','validator','administrator','officer','supervisor'],
-  'gateway-monitor': ['analyst','validator','administrator','operator','officer','supervisor'],
-  'field-mobile': ['analyst','validator','administrator','operator','officer','supervisor'],
-  'simulator': ['analyst','validator','administrator','operator','officer','supervisor'],
-  'ai-advisor': ['analyst','validator','administrator','operator','officer','supervisor'],
-  'settings': ['analyst','validator','administrator','operator','officer','supervisor'],
-};
-
 
 const PageRenderer = ({ activePage, currentPage, navigate, user, onUpdateUser }) => {
   const targetPage = activePage || currentPage;
 
   const renderPage = () => {
-    // Strict Role Requirements Guard Check
-    const allowedRoles = PAGE_ROLES[targetPage];
-    if (allowedRoles && user?.role && !allowedRoles.includes(user.role.toLowerCase())) {
-      return <AccessDeniedPage navigate={navigate} />;
-    }
-
     switch (targetPage) {
-      case 'landing': return <LandingPage onEnter={() => navigate('predictions/heatmap')} onLogin={onUpdateUser} navigate={navigate} />;
-      case 'dashboard': return <CrimeCastDashboard navigate={navigate} />;
-      case 'predictions': return <PredictionMap navigate={navigate} initialMode="predictions" />;
-      case 'predictions/heatmap': return <PredictionMap navigate={navigate} initialMode="heatmap" />;
-      case 'analytics': return <AnalyticsPage navigate={navigate} />;
-      case 'model-metrics': return <ModelMetrics navigate={navigate} />;
-      case 'gateway-monitor': return <GatewayMonitor navigate={navigate} />;
-      case 'field-mobile': return <FieldDispatchMobile navigate={navigate} />;
-      case 'simulator': return <SyndicateSimulator navigate={navigate} />;
-      case 'guru':
-      case 'ai-advisor': return <CyberGuru />;
+      case 'landing':
+        return <LandingPage onEnter={() => navigate('dashboard')} onLogin={onUpdateUser} navigate={navigate} />;
+
+      case 'dashboard':
+        return <CrimeCastDashboard navigate={navigate} />;
+
+      // ── COMPLAINTS ──────────────────────────────────────────
+      case 'complaints':
+        return <ComplaintsDashboard navigate={navigate} />;
+      case 'complaints/new':
+        return <ComplaintForm navigate={navigate} />;
+
+      // ── LIVE MAP & PREDICTIONS ────────────────────────────────
+      case 'predictions/heatmap':
+      case 'predictions/map':
+      case 'predictions':
+        return <PredictionMap navigate={navigate} initialMode="heatmap" />;
+      case 'predictions/active':
+        return <PredictionMap navigate={navigate} initialMode="active" />;
+      case 'model-metrics':
+        return <ModelMetrics navigate={navigate} />;
+
+      // ── OPERATIONS ───────────────────────────────────────────
+      case 'alerts':
+        return <AlertCenter navigate={navigate} />;
+      case 'freeze-ops':
+      case 'freeze/queue':
+      case 'freeze':
+        return <FreezeOpsDashboard navigate={navigate} />;
+      case 'evidence-locker':
+        return <EvidenceLocker navigate={navigate} />;
+      case 'intelligence/mule-network':
+      case 'syndicate-simulator':
+        return <SyndicateSimulator navigate={navigate} />;
+      case 'gateway-monitor':
+        return <GatewayMonitor navigate={navigate} />;
+      case 'lea-dispatches':
+      case 'analytics':
+        return <CrossJurisdictionRollup navigate={navigate} />;
+
+      // ── FIELD ────────────────────────────────────────────────
+      case 'field-mobile':
+        return <FieldDispatchMobile navigate={navigate} />;
+
+      // ── SYSTEM ───────────────────────────────────────────────
       case 'profile':
-      case 'settings': return <ProfilePage user={user} onUpdateUser={onUpdateUser} navigate={navigate} />;
-      case 'complaints': return <ComplaintsDashboard navigate={navigate} />;
-      case 'complaints/new': return <ComplaintForm navigate={navigate} />;
-      case 'mule-network':
-      case 'intelligence/mule-network': return <MuleNetworkIntelligence navigate={navigate} />;
-      case 'alerts': return <AlertCenter navigate={navigate} />;
-      case 'freeze-ops': return <FreezeOpsDashboard />;
-      case 'ingest-alerts': return <ProactiveAlertFeed />;
-      case 'lea-dispatches': return <LEADispatchQueue />;
+      case 'settings':
+        return <ProfilePage user={user} onUpdateUser={onUpdateUser} navigate={navigate} />;
+      case 'auth/mfa/setup':
+      case 'mfa-setup':
+        return <MFASetupPage navigate={navigate} />;
 
-
+      // ── DYNAMIC ROUTES ───────────────────────────────────────
       default: {
-        // Dynamic routes
+        if (targetPage.startsWith('predictions/')) {
+          const id = targetPage.split('/')[1];
+          if (!id || id === 'heatmap' || id === 'map' || id === 'active') {
+            return <PredictionMap navigate={navigate} initialMode={id === 'active' ? 'active' : 'heatmap'} />;
+          }
+          return <PredictionDetail predictionId={id} navigate={navigate} />;
+        }
         if (targetPage.startsWith('complaints/')) {
           const id = targetPage.split('/')[1];
-          if (!id || id.startsWith(':') || id === 'undefined' || id === 'null') {
-            return <NotFoundPage navigate={navigate} />;
+          if (!id || id === 'new' || id.startsWith(':') || id === 'undefined' || id === 'null') {
+            return <ComplaintForm navigate={navigate} />;
           }
           return <ComplaintDetail complaintId={id} navigate={navigate} />;
         }
-        if (targetPage.startsWith('predictions/') && targetPage !== 'predictions/heatmap') {
-          const id = targetPage.split('/')[1];
-          if (!id || id.startsWith(':') || id === 'undefined' || id === 'null') {
-            return <NotFoundPage navigate={navigate} />;
-          }
-          return <PredictionDetail predictionId={id} navigate={navigate} />;
+        if (targetPage.startsWith('evidence/')) {
+          const complaintId = targetPage.split('/')[1];
+          return <EvidenceLocker complaintId={complaintId} navigate={navigate} />;
         }
         return <NotFoundPage navigate={navigate} />;
       }

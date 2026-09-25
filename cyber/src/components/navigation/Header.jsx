@@ -21,7 +21,13 @@ const Header = ({
 
   return (
     <header className="h-16 flex items-center justify-between px-4 md:px-8 relative z-10"
-            style={{
+            style={theme === 'light' ? {
+              background: 'rgba(255,255,255,0.90)',
+              backdropFilter: 'blur(20px) saturate(1.8)',
+              WebkitBackdropFilter: 'blur(20px) saturate(1.8)',
+              borderBottom: '1px solid rgba(99,102,241,0.12)',
+              boxShadow: '0 2px 16px rgba(99,102,241,0.07)',
+            } : {
               background: 'rgba(0,0,0,0.5)',
               backdropFilter: 'blur(20px) saturate(1.3)',
               WebkitBackdropFilter: 'blur(20px) saturate(1.3)',
@@ -40,7 +46,11 @@ const Header = ({
         </div>
 
         {/* Live Telemetry Status Badge */}
-        <div className="flex items-center gap-2 px-2.5 py-1 rounded-full bg-zinc-900/80 border border-zinc-800 text-[10px] font-mono shadow-inner">
+        <div className={`flex items-center gap-2 px-2.5 py-1 rounded-full border text-[10px] font-mono shadow-inner ${
+          theme === 'light'
+            ? 'bg-white/80 border-indigo-100'
+            : 'bg-zinc-900/80 border-zinc-800'
+        }`}>
           <span className={`w-2 h-2 rounded-full ${
             wsStatus === 'connected'
               ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.9)] animate-pulse'

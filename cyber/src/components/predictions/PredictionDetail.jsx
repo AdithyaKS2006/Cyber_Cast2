@@ -10,6 +10,7 @@ import {
   AlertTriangle, Loader2, Shield, TrendingUp, X, Send, UserCheck, Activity, Copy, Check
 } from 'lucide-react';
 import apiClient from '../../utils/apiClient';
+import useTheme from '../../hooks/useTheme';
 
 /* ── Helpers ─────────────────────────────────────────────────────────── */
 const probColor = (p) =>
@@ -390,6 +391,7 @@ const IntelligenceDispatch = ({ prediction, onDispatch, dispatching }) => {
 
 /* ══ Main Component ════════════════════════════════════════════════════ */
 const PredictionDetail = ({ predictionId, navigate }) => {
+  const isLight = useTheme();
   const [prediction, setPrediction] = useState(null);
   const [loading, setLoading]       = useState(true);
   const [error, setError]           = useState('');
@@ -480,19 +482,23 @@ const PredictionDetail = ({ predictionId, navigate }) => {
   };
 
   if (loading && !prediction) return (
-    <div className="flex items-center justify-center min-h-screen" style={{ background: '#000' }}>
+    <div className="flex items-center justify-center min-h-screen" style={{ background: isLight ? 'transparent' : '#000' }}>
       <Loader2 className="w-8 h-8 text-orange-400 animate-spin" />
     </div>
   );
 
   if (error || !prediction) return (
-    <div className="flex flex-col items-center justify-center min-h-screen gap-4" style={{ background: '#000' }}>
+    <div className="flex flex-col items-center justify-center min-h-screen gap-4" style={{ background: isLight ? 'transparent' : '#000' }}>
       <AlertTriangle className="w-12 h-12 text-red-400" />
-      <p className="text-white font-bold uppercase text-sm">
+      <p className={`font-bold uppercase text-sm ${isLight ? 'text-slate-800' : 'text-white'}`}>
         {typeof error === 'object' ? JSON.stringify(error) : String(error || 'Prediction not found')}
       </p>
       <button onClick={() => navigate('predictions')}
-        className="px-4 py-2 rounded-xl bg-zinc-900 text-zinc-400 text-[10px] font-black uppercase hover:text-white">
+        className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase transition-colors ${
+          isLight
+            ? 'bg-slate-100 border border-slate-200 text-slate-700 hover:text-slate-900'
+            : 'bg-zinc-900 text-zinc-400 hover:text-white'
+        }`}>
         ← Back
       </button>
     </div>
@@ -502,7 +508,7 @@ const PredictionDetail = ({ predictionId, navigate }) => {
   const complaint = prediction.complaint_summary ?? {};
 
   return (
-    <div className="min-h-[calc(100vh-65px)] p-6 space-y-6" style={{ background: 'linear-gradient(135deg,#000,#0a0a0a)' }}>
+    <div className="min-h-[calc(100vh-65px)] p-6 space-y-6" style={{ background: isLight ? 'transparent' : 'linear-gradient(135deg,#000,#0a0a0a)' }}>
 
       {/* Breadcrumb */}
       <div className="flex items-center gap-3">

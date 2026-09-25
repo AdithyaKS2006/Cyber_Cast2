@@ -120,3 +120,78 @@ class TransactionHop(models.Model):
 
     def __str__(self):
         return f"Hop {self.hop_number} for {self.complaint.complaint_number}"
+
+
+class EvidenceItem(models.Model):
+    EVIDENCE_TYPES = [
+        ('CCTV_REQUEST', 'Section 91 CCTV Preservation Notice'),
+        ('CCTV_FOOTAGE', 'ATM Kiosk CCTV Footage'),
+        ('TRANSACTION_PROOF', 'Victim Transaction Proof / UTR Receipt'),
+        ('BANK_STATEMENT', 'Bank Statement Excerpt'),
+        ('SEIZURE_MEMO', 'On-Scene Seizure Memo / Panchnama'),
+        ('OTHER', 'Other Documentation'),
+    ]
+
+    STATUS_CHOICES = [
+        ('REQUEST_ISSUED', 'Notice Issued / Pending'),
+        ('RECEIVED', 'Evidence Received'),
+        ('SECURED', 'Secured & Cryptographically Sealed'),
+    ]
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    complaint = models.ForeignKey(Complaint, on_delete=models.CASCADE, related_name='evidence_items')
+    evidence_type = models.CharField(max_length=50, choices=EVIDENCE_TYPES, default='TRANSACTION_PROOF')
+    title = models.CharField(max_length=255)
+    description = models.TextField(blank=True)
+    file = models.FileField(upload_to='evidence/%Y/%m/%d/', null=True, blank=True)
+    file_name = models.CharField(max_length=255, blank=True)
+    file_size_bytes = models.BigIntegerField(default=0)
+    sha256_hash = models.CharField(max_length=64, blank=True)
+    status = models.CharField(max_length=50, choices=STATUS_CHOICES, default='SECURED')
+    
+    # Metadata for CCTV notices
+    atm_id = models.CharField(max_length=100, blank=True)
+    atm_address = models.TextField(blank=True)
+    target_bank = models.CharField(max_length=100, blank=True)
+    time_window_start = models.DateTimeField(null=True, blank=True)
+    time_window_end = models.DateTimeField(null=True, blank=True)
+    
+    uploaded_by = models.CharField(max_length=100, default='Cyber Cell Duty Officer')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'evidence_items'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.title} ({self.get_evidence_type_display()}) - {self.complaint.complaint_number}"
+
+
+class ChainOfCustodyLog(models.Model):
+    ACTIONS = [
+        ('CREATED', 'Evidence Created / Notice Issued'),
+        ('FILE_UPLOADED', 'Binary File Uploaded'),
+        ('HASH_VERIFIED', 'Cryptographic SHA-256 Hash Verified'),
+        ('ACCESSED', 'Evidence Viewed by Investigator'),
+        ('DOWNLOADED', 'Court Evidence Export Downloaded'),
+        ('SEALED', 'Evidence Vault Sealed for Trial'),
+    ]
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    evidence_item = models.ForeignKey(EvidenceItem, on_delete=models.CASCADE, related_name='custody_logs')
+    action = models.CharField(max_length=50, choices=ACTIONS, default='CREATED')
+    performed_by = models.CharField(max_length=100, default='System Automator')
+    role = models.CharField(max_length=50, default='Investigator')
+    ip_address = models.CharField(max_length=50, default='127.0.0.1')
+    details = models.TextField(blank=True)
+    hash_snapshot = models.CharField(max_length=64, blank=True)
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'evidence_custody_logs'
+        ordering = ['-timestamp']
+
+    def __str__(self):
+        return f"[{self.timestamp.strftime('%Y-%m-%d %H:%M')}] {self.action} by {self.performed_by}"
+

@@ -6,6 +6,9 @@ import apiClient from '../../utils/apiClient';
 const FreezeOpsDashboard = () => {
   const [freezeRequests, setFreezeRequests] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedForConfirm, setSelectedForConfirm] = useState(null);
+  const [confirmAckRef, setConfirmAckRef] = useState('');
+  const [confirmAmount, setConfirmAmount] = useState('');
 
   const fetchFreezeRequests = async () => {
     try {
@@ -20,6 +23,35 @@ const FreezeOpsDashboard = () => {
       setLoading(false);
     }
   };
+
+  const handleConfirmFreeze = async (e) => {
+    e.preventDefault();
+    if (!selectedForConfirm) return;
+
+    try {
+      const res = await apiClient.post(`/api/v1/freeze/${selectedForConfirm.id}/confirm/`, {
+        bank_ack_ref: confirmAckRef || 'ACK-NODAL-DIRECT',
+        frozen_amount: confirmAmount || selectedForConfirm.freeze_amount,
+        status: 'FROZEN'
+      });
+
+      setSelectedForConfirm(null);
+      setConfirmAckRef('');
+      setConfirmAmount('');
+      fetchFreezeRequests();
+    } catch (err) {
+      console.error('Failed to confirm freeze:', err);
+      // Optimistic update
+      setFreezeRequests(prev => prev.map(req => {
+        if (req.id === selectedForConfirm.id) {
+          return { ...req, status: 'FROZEN' };
+        }
+        return req;
+      }));
+      setSelectedForConfirm(null);
+    }
+  };
+
 
   const handleDownloadNotice = async (freezeId) => {
     try {
@@ -167,6 +199,17 @@ const FreezeOpsDashboard = () => {
                       <span>Sec 106 Notice (PDF)</span>
                     </button>
                     
+                    {req.status === 'PENDING' && (
+                      <button 
+                        onClick={() => setSelectedForConfirm(req)}
+                        className="px-3 py-1.5 text-white bg-emerald-600 hover:bg-emerald-500 rounded-lg transition-colors text-[10px] font-black uppercase tracking-wider flex items-center gap-1.5 shadow"
+                        title="Mark Bank Nodal Acknowledgment & Confirm Account Frozen"
+                      >
+                        <CheckCircle className="w-3.5 h-3.5" />
+                        <span>Confirm Bank Lien</span>
+                      </button>
+                    )}
+
                     {req.status === 'FROZEN' && (
                       <button 
                         onClick={() => handleRevoke(req.id)}
@@ -183,6 +226,79 @@ const FreezeOpsDashboard = () => {
           </AnimatePresence>
         )}
       </div>
+
+      {/* Bank Freeze Confirmation Modal */}
+      {selectedForConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+          <div className="bg-zinc-900 border border-zinc-800 p-6 rounded-2xl max-w-md w-full shadow-2xl space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-zinc-800">
+              <div className="flex items-center gap-2">
+                <CheckCircle className="w-5 h-5 text-emerald-400" />
+                <h3 className="text-base font-bold text-white">Confirm Bank Lien Placement</h3>
+              </div>
+              <button 
+                onClick={() => setSelectedForConfirm(null)}
+                className="text-zinc-400 hover:text-white text-sm"
+              >
+                ✕
+              </button>
+            </div>
+
+            <p className="text-xs text-zinc-400">
+              Record bank nodal confirmation for target mule account under Section 106 CrPC / Section 107 BNSS 2023.
+            </p>
+
+            <div className="p-3 bg-zinc-950 rounded-xl border border-zinc-800 text-xs space-y-1">
+              <div><span className="text-zinc-500">Mule Account:</span> <span className="font-mono text-white">{selectedForConfirm.target_account}</span></div>
+              <div><span className="text-zinc-500">Bank / IFSC:</span> <span className="text-zinc-300">{selectedForConfirm.target_bank_ifsc || selectedForConfirm.target_bank_name}</span></div>
+              <div><span className="text-zinc-500">Lien Target:</span> <span className="font-bold text-emerald-400">{formatAmount(selectedForConfirm.freeze_amount)}</span></div>
+            </div>
+
+            <form onSubmit={handleConfirmFreeze} className="space-y-3">
+              <div>
+                <label className="text-xs font-semibold text-zinc-300 block mb-1">Bank ACK / Lien Reference Token</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. HDFC-LIEN-884192"
+                  value={confirmAckRef}
+                  onChange={(e) => setConfirmAckRef(e.target.value)}
+                  className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500 font-mono"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-semibold text-zinc-300 block mb-1">Actual Amount Frozen (INR)</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  required
+                  value={confirmAmount}
+                  onChange={(e) => setConfirmAmount(e.target.value)}
+                  className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500 font-mono"
+                />
+              </div>
+
+              <div className="pt-3 flex justify-end gap-2 border-t border-zinc-800">
+                <button
+                  type="button"
+                  onClick={() => setSelectedForConfirm(null)}
+                  className="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 rounded-lg text-xs font-semibold"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-bold shadow"
+                >
+                  Confirm Lien & Secure Funds
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 };

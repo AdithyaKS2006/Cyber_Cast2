@@ -1,6 +1,6 @@
 /**
  * AlertCenter.jsx — CrimeCast Real-Time Alert Center
- * WebSocket feed · Countdown timers · Skeleton loading · Empty state · Framer Motion
+ * WebSocket feed · Countdown timers · Skeleton loading · Empty state · Framer Motion · Light/Dark Theme
  */
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -12,6 +12,7 @@ import apiClient from '../../utils/apiClient';
 import Skeleton from '../ui/Skeleton';
 import EmptyState from '../ui/EmptyState';
 import PageTransition from '../ui/PageTransition';
+import useTheme from '../../hooks/useTheme';
 
 /* ── Countdown hook ────────────────────────────────────────────────── */
 const useCountdown = (etaHours) => {
@@ -37,20 +38,17 @@ const useCountdown = (etaHours) => {
 
 /* ── Status config ─────────────────────────────────────────────────── */
 const STATUS = {
-  SENT:         { label: 'Alert Sent',   bg: 'rgba(249,115,22,0.12)', color: '#f97316', border: 'rgba(249,115,22,0.3)' },
-  ACKNOWLEDGED: { label: 'Acknowledged', bg: 'rgba(59,130,246,0.12)',  color: '#60a5fa', border: 'rgba(59,130,246,0.3)' },
-  DISPATCHED:   { label: 'Dispatched',   bg: 'rgba(34,197,94,0.12)',   color: '#4ade80', border: 'rgba(34,197,94,0.3)'  },
-  FALSE_ALARM:  { label: 'False Alarm',  bg: 'rgba(63,63,70,0.3)',     color: '#71717a', border: 'rgba(63,63,70,0.5)'   },
-  EXPIRED:      { label: 'Expired',      bg: 'rgba(39,39,42,0.4)',     color: '#52525b', border: 'rgba(39,39,42,0.6)'   },
+  SENT:         { label: 'Alert Sent',   bg: 'rgba(249,115,22,0.12)', color: '#ea580c', border: 'rgba(249,115,22,0.35)' },
+  ACKNOWLEDGED: { label: 'Acknowledged', bg: 'rgba(59,130,246,0.12)',  color: '#2563eb', border: 'rgba(59,130,246,0.35)' },
+  DISPATCHED:   { label: 'Dispatched',   bg: 'rgba(34,197,94,0.12)',   color: '#16a34a', border: 'rgba(34,197,94,0.35)'  },
+  FALSE_ALARM:  { label: 'False Alarm',  bg: 'rgba(100,116,139,0.12)', color: '#64748b', border: 'rgba(100,116,139,0.3)' },
+  EXPIRED:      { label: 'Expired',      bg: 'rgba(148,163,184,0.15)', color: '#475569', border: 'rgba(148,163,184,0.3)' },
 };
 
-// Bands relative to the 40-class random baseline (2.5%): ~0.26 is a strong
-// single-district signal, so "high" starts at 0.20 — not 0.7 (which real
-// calibrated probabilities never reach and would leave every card yellow).
 const probColor = (p) => p >= 0.20 ? '#ef4444' : p >= 0.10 ? '#f97316' : '#eab308';
 
 /* ── Single alert card ─────────────────────────────────────────────── */
-const AlertCard = ({ alert, onAck, onDispatch, onFalse, idx }) => {
+const AlertCard = ({ alert, onAck, onDispatch, onFalse, idx, isLight }) => {
   const { str, expired, critical } = useCountdown(alert.eta_hours);
   const prob  = alert.probability ?? 0;
   const color = probColor(prob);
@@ -67,11 +65,17 @@ const AlertCard = ({ alert, onAck, onDispatch, onFalse, idx }) => {
       animate={{ opacity: 1, y: 0,  scale: 1 }}
       exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.2 } }}
       transition={{ delay: idx * 0.04, duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-      className={`p-4 rounded-2xl border space-y-3 transition-colors relative overflow-hidden
-        ${isUrgent ? 'alert-critical-border' : ''}`}
+      className={`p-4 rounded-2xl border space-y-3 transition-all relative overflow-hidden ${
+        isUrgent ? 'alert-critical-border' : ''
+      }`}
       style={{
-        background: isUrgent ? 'rgba(239,68,68,0.05)' : 'rgba(0,0,0,0.65)',
-        borderColor: isUrgent ? 'rgba(239,68,68,0.4)' : 'rgba(39,39,42,0.6)',
+        background: isUrgent
+          ? (isLight ? 'rgba(254,242,242,0.98)' : 'rgba(239,68,68,0.05)')
+          : (isLight ? 'rgba(255,255,255,0.98)' : 'rgba(0,0,0,0.65)'),
+        borderColor: isUrgent
+          ? 'rgba(239,68,68,0.4)'
+          : (isLight ? 'rgba(226,232,240,0.95)' : 'rgba(39,39,42,0.6)'),
+        boxShadow: isLight ? '0 4px 20px rgba(99,102,241,0.06)' : 'none',
         backdropFilter: 'blur(16px)',
       }}
     >
@@ -83,10 +87,10 @@ const AlertCard = ({ alert, onAck, onDispatch, onFalse, idx }) => {
       {/* Row 1: Complaint # + status */}
       <div className="flex items-start justify-between gap-2">
         <div>
-          <p className="text-[9px] font-black text-orange-400 uppercase tracking-wide">
+          <p className={`text-[9px] font-black uppercase tracking-wide ${isLight ? 'text-orange-600' : 'text-orange-400'}`}>
             {typeof alert.complaint_number === 'object' ? JSON.stringify(alert.complaint_number) : String(alert.complaint_number ?? `ALT-${typeof alert.id === 'object' ? JSON.stringify(alert.id) : alert.id}`)}
           </p>
-          <p className="text-xl font-black text-white">
+          <p className={`text-xl font-black ${isLight ? 'text-slate-900' : 'text-white'}`}>
             ₹{Number(alert.fraud_amount ?? 0).toLocaleString('en-IN')}
           </p>
         </div>
@@ -101,13 +105,13 @@ const AlertCard = ({ alert, onAck, onDispatch, onFalse, idx }) => {
       {/* Row 2: Zone + Probability */}
       <div className="flex justify-between items-end">
         <div>
-          <p className="text-[8px] text-zinc-600 font-bold uppercase mb-0.5">Predicted Zone</p>
-          <p className="text-[11px] font-black text-white leading-tight">
+          <p className={`text-[8px] font-bold uppercase mb-0.5 ${isLight ? 'text-slate-500' : 'text-zinc-500'}`}>Predicted Zone</p>
+          <p className={`text-[11px] font-black leading-tight ${isLight ? 'text-slate-900' : 'text-white'}`}>
             {typeof alert.predicted_zone_name === 'object' && alert.predicted_zone_name !== null ? (alert.predicted_zone_name.name || JSON.stringify(alert.predicted_zone_name)) : String(alert.predicted_zone_name ?? '—')}
           </p>
         </div>
         <div className="text-right">
-          <p className="text-[8px] text-zinc-600 font-bold uppercase mb-0.5">Likelihood</p>
+          <p className={`text-[8px] font-bold uppercase mb-0.5 ${isLight ? 'text-slate-500' : 'text-zinc-500'}`}>Likelihood</p>
           <p className="text-2xl font-black leading-none" style={{ color }}>
             {(prob * 100).toFixed(0)}%
           </p>
@@ -115,7 +119,7 @@ const AlertCard = ({ alert, onAck, onDispatch, onFalse, idx }) => {
       </div>
 
       {/* Probability bar */}
-      <div className="h-1.5 rounded-full bg-zinc-800/80 overflow-hidden">
+      <div className={`h-1.5 rounded-full overflow-hidden ${isLight ? 'bg-slate-100' : 'bg-zinc-800/80'}`}>
         <motion.div
           className="h-full rounded-full"
           initial={{ width: 0 }}
@@ -129,25 +133,41 @@ const AlertCard = ({ alert, onAck, onDispatch, onFalse, idx }) => {
       <div
         className="flex items-center gap-2 px-3 py-2 rounded-xl"
         style={{
-          background: expired ? 'rgba(39,39,42,0.5)'
-                    : critical ? 'rgba(239,68,68,0.1)'
-                    : 'rgba(249,115,22,0.07)',
+          background: expired
+            ? (isLight ? '#f1f5f9' : 'rgba(39,39,42,0.5)')
+            : critical
+              ? (isLight ? '#fee2e2' : 'rgba(239,68,68,0.1)')
+              : (isLight ? '#fff7ed' : 'rgba(249,115,22,0.07)'),
         }}
       >
         <Clock
-          className={`w-3.5 h-3.5 flex-shrink-0
-            ${expired ? 'text-zinc-600' : critical ? 'text-red-400' : 'text-orange-400'}`}
+          className={`w-3.5 h-3.5 flex-shrink-0 ${
+            expired
+              ? (isLight ? 'text-slate-400' : 'text-zinc-600')
+              : critical
+                ? 'text-red-500'
+                : (isLight ? 'text-orange-500' : 'text-orange-400')
+          }`}
         />
         <span
-          className={`text-[10px] font-black uppercase
-            ${expired ? 'text-zinc-500' : critical ? 'text-red-400' : 'text-orange-300'}`}
+          className={`text-[10px] font-black uppercase ${
+            expired
+              ? (isLight ? 'text-slate-500' : 'text-zinc-500')
+              : critical
+                ? 'text-red-600'
+                : (isLight ? 'text-orange-800' : 'text-orange-300')
+          }`}
         >
           {expired ? 'ETA Expired' : `Cash-Out in ${str}`}
         </span>
         {critical && !expired && (
           <span
             className="ml-auto text-[7px] font-black uppercase px-1.5 py-0.5 rounded"
-            style={{ background: 'rgba(239,68,68,0.2)', color: '#f87171', border: '1px solid rgba(239,68,68,0.35)' }}
+            style={{
+              background: isLight ? 'rgba(239,68,68,0.15)' : 'rgba(239,68,68,0.2)',
+              color: isLight ? '#dc2626' : '#f87171',
+              border: '1px solid rgba(239,68,68,0.35)',
+            }}
           >
             URGENT
           </span>
@@ -161,14 +181,18 @@ const AlertCard = ({ alert, onAck, onDispatch, onFalse, idx }) => {
             onClick={() => onAck(alert)}
             className="flex items-center justify-center gap-1 py-2.5 rounded-xl text-[8px]
                        font-black uppercase transition-all hover:scale-[1.02] active:scale-95 touch-feedback"
-            style={{ background: 'rgba(59,130,246,0.15)', border: '1px solid rgba(59,130,246,0.3)', color: '#60a5fa' }}
+            style={{
+              background: isLight ? 'rgba(59,130,246,0.10)' : 'rgba(59,130,246,0.15)',
+              border: isLight ? '1px solid rgba(59,130,246,0.25)' : '1px solid rgba(59,130,246,0.3)',
+              color: isLight ? '#2563eb' : '#60a5fa',
+            }}
           >
             <CheckCircle className="w-3 h-3" /> Ack
           </button>
           <button
             onClick={() => onDispatch(alert)}
             className="flex items-center justify-center gap-1 py-2.5 rounded-xl text-[8px]
-                       font-black uppercase text-white transition-all hover:scale-[1.02] active:scale-95 touch-feedback"
+                       font-black uppercase text-white transition-all hover:scale-[1.02] active:scale-95 touch-feedback shadow-sm"
             style={{ background: 'linear-gradient(135deg, #f97316, #ef4444)' }}
           >
             <Truck className="w-3 h-3" /> Dispatch
@@ -177,7 +201,11 @@ const AlertCard = ({ alert, onAck, onDispatch, onFalse, idx }) => {
             onClick={() => onFalse(alert)}
             className="flex items-center justify-center gap-1 py-2.5 rounded-xl text-[8px]
                        font-black uppercase transition-all hover:scale-[1.02] active:scale-95 touch-feedback"
-            style={{ background: 'rgba(39,39,42,0.6)', border: '1px solid rgba(63,63,70,0.5)', color: '#71717a' }}
+            style={{
+              background: isLight ? '#f1f5f9' : 'rgba(39,39,42,0.6)',
+              border: isLight ? '1px solid #e2e8f0' : '1px solid rgba(63,63,70,0.5)',
+              color: isLight ? '#64748b' : '#71717a',
+            }}
           >
             <XCircle className="w-3 h-3" /> False
           </button>
@@ -188,7 +216,9 @@ const AlertCard = ({ alert, onAck, onDispatch, onFalse, idx }) => {
         <div className="mt-2">
           <button
             onClick={() => setShowXml(!showXml)}
-            className="w-full text-left text-[9px] font-black uppercase text-zinc-500 hover:text-orange-400 transition-colors flex justify-between items-center"
+            className={`w-full text-left text-[9px] font-black uppercase transition-colors flex justify-between items-center ${
+              isLight ? 'text-slate-500 hover:text-orange-600' : 'text-zinc-500 hover:text-orange-400'
+            }`}
           >
             <span>ISO 20022 camt.056 CBS Payload</span>
             <span>{showXml ? 'Hide' : 'View'}</span>
@@ -201,7 +231,9 @@ const AlertCard = ({ alert, onAck, onDispatch, onFalse, idx }) => {
                 exit={{ opacity: 0, height: 0 }}
                 className="mt-2 overflow-hidden"
               >
-                <div className="bg-black/80 border border-zinc-800 p-3 rounded-lg overflow-x-auto text-[8px] font-mono text-zinc-400 max-h-40 overflow-y-auto custom-scrollbar">
+                <div className={`p-3 rounded-lg overflow-x-auto text-[8px] font-mono max-h-40 overflow-y-auto custom-scrollbar border ${
+                  isLight ? 'bg-slate-50 border-slate-200 text-slate-700' : 'bg-black/80 border-zinc-800 text-zinc-400'
+                }`}>
                   <pre>{xmlPayload}</pre>
                 </div>
               </motion.div>
@@ -211,9 +243,9 @@ const AlertCard = ({ alert, onAck, onDispatch, onFalse, idx }) => {
       )}
 
       {alert.status === 'DISPATCHED' && (
-        <div className="flex items-center gap-2 text-green-400">
+        <div className={`flex items-center gap-2 ${isLight ? 'text-emerald-600' : 'text-green-400'}`}>
           <CheckCircle className="w-4 h-4" />
-          <span className="text-[9px] font-black uppercase">Team Dispatched</span>
+          <span className="text-[9px] font-black uppercase font-bold">Team Dispatched</span>
         </div>
       )}
     </motion.div>
@@ -222,6 +254,7 @@ const AlertCard = ({ alert, onAck, onDispatch, onFalse, idx }) => {
 
 /* ══ Main Component ═════════════════════════════════════════════════ */
 const AlertCenter = ({ navigate }) => {
+  const isLight = useTheme();
   const [alerts, setAlerts]   = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError]     = useState(null);
@@ -249,94 +282,94 @@ const AlertCenter = ({ navigate }) => {
 
   /* ─ Fetch ─ (apiClient returns a raw Response; parse it, never fake it) */
   const fetchAlerts = useCallback(async () => {
-    setLoading(true);
-    setError(null);
     try {
-      const res = await apiClient('/api/v1/predictions/alerts/?limit=50');
-      if (res.ok) {
-        const data = await res.json();
-        const list = data?.results ?? data ?? [];
-        setAlerts(Array.isArray(list) ? list : []);
-      } else {
-        setError(`Server returned ${res.status}`);
-        setAlerts([]);
-      }
+      setLoading(true);
+      setError(null);
+      const res = await apiClient('/api/v1/predictions/alerts/');
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      const list = Array.isArray(data) ? data : (data.results ?? data.alerts ?? []);
+      setAlerts(list);
     } catch (err) {
       const msg = typeof err === 'object' ? (err.message || JSON.stringify(err)) : String(err);
-      setError(msg || 'Failed to fetch alerts');
-      setAlerts([]);
+      setError(msg || 'Failed to load alerts');
     } finally {
       setLoading(false);
     }
   }, []);
 
-  useEffect(() => { fetchAlerts(); }, [fetchAlerts]);
-
-  /* ─ WebSocket ─ */
   useEffect(() => {
-    const proto = window.location.protocol === 'https:' ? 'wss' : 'ws';
-    const defaultHost = (window.location.port === '3000' || window.location.port === '5173')
-      ? `${window.location.hostname}:8000`
-      : window.location.host;
-    const host  = import.meta.env.VITE_WS_HOST || defaultHost;
-    const url   = `${proto}://${host}/ws/predictions/`;
+    fetchAlerts();
+  }, [fetchAlerts]);
+
+  /* ─ WebSocket live updates ─ */
+  useEffect(() => {
+    const proto = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const host  = window.location.host;
+    const wsUrl = `${proto}//${host}/ws/alerts/`;
+
     let ws;
     try {
-      ws = new WebSocket(url);
+      ws = new WebSocket(wsUrl);
+      wsRef.current = ws;
+
       ws.onmessage = (e) => {
         try {
-          const data = JSON.parse(e.data);
-          if (data.type === 'prediction') {
-            const a = {
-              id: `ws_${Date.now()}`,
-              complaint_number: data.complaint_id,
-              fraud_amount: data.fraud_amount ?? 0,
-              predicted_zone_name: data.zone,
-              probability: data.probability,
-              eta_hours: data.eta,
-              status: 'SENT',
-            };
-            setAlerts(prev => [a, ...prev]);
-            playBeep();
-            if (Notification.permission === 'granted') {
-              new Notification('CrimeCast Alert', {
-                body: `${data.zone} — ${(data.probability * 100).toFixed(0)}% • ETA ${data.eta}h`,
-              });
-            }
+          const payload = JSON.parse(e.data);
+          if (payload.type === 'alert.new' && payload.data) {
+            setAlerts(prev => {
+              const exists = prev.some(a => a.id === payload.data.id);
+              if (exists) return prev;
+              playBeep();
+              return [payload.data, ...prev];
+            });
+          } else if (payload.type === 'alert.update' && payload.data) {
+            setAlerts(prev => prev.map(a => a.id === payload.data.id ? { ...a, ...payload.data } : a));
           }
         } catch {}
       };
+
+      ws.onerror = () => {};
     } catch {}
-    wsRef.current = ws;
+
     return () => {
-      if (ws) {
-        if (ws.readyState === WebSocket.CONNECTING) {
-          ws.onopen = () => ws.close();
-        } else if (ws.readyState === WebSocket.OPEN) {
-          ws.close();
-        }
-      }
+      if (ws) ws.close();
     };
   }, [playBeep]);
 
-  /* ─ Notification permission ─ */
-  useEffect(() => {
-    if (Notification.permission === 'default') Notification.requestPermission();
+  /* ─ Actions ─ */
+  const handleAck = useCallback(async (alert) => {
+    try {
+      const res = await apiClient(`/api/v1/predictions/alerts/${alert.id}/ack/`, { method: 'POST' });
+      if (res.ok) {
+        setAlerts(prev => prev.map(a => a.id === alert.id ? { ...a, status: 'ACKNOWLEDGED' } : a));
+      }
+    } catch {}
   }, []);
 
-  const updateStatus = async (alert, status, apiPath) => {
-    try { await apiClient(apiPath, { method: 'PATCH' }); } catch {}
-    setAlerts(prev => prev.map(a => a.id === alert.id ? { ...a, status } : a));
-  };
+  const handleDispatch = useCallback(async (alert) => {
+    try {
+      const res = await apiClient(`/api/v1/predictions/alerts/${alert.id}/dispatch/`, { method: 'POST' });
+      if (res.ok) {
+        setAlerts(prev => prev.map(a => a.id === alert.id ? { ...a, status: 'DISPATCHED' } : a));
+      }
+    } catch {}
+  }, []);
 
-  const handleAck      = (a) => updateStatus(a, 'ACKNOWLEDGED', `/api/v1/predictions/alerts/${a.id}/acknowledge/`);
-  const handleDispatch = (a) => updateStatus(a, 'DISPATCHED',   `/api/v1/predictions/alerts/${a.id}/dispatch/`);
-  const handleFalse    = (a) => updateStatus(a, 'FALSE_ALARM',  `/api/v1/predictions/alerts/${a.id}/false-alarm/`);
+  const handleFalse = useCallback(async (alert) => {
+    try {
+      const res = await apiClient(`/api/v1/predictions/alerts/${alert.id}/false-alarm/`, { method: 'POST' });
+      if (res.ok) {
+        setAlerts(prev => prev.map(a => a.id === alert.id ? { ...a, status: 'FALSE_ALARM' } : a));
+      }
+    } catch {}
+  }, []);
 
+  /* ─ Filtering ─ */
   const FILTER_TABS = ['ALL', 'SENT', 'ACKNOWLEDGED', 'DISPATCHED'];
 
-  const displayed = [...alerts]
-    .filter(a => filter === 'ALL' || a.status === filter)
+  const displayed = alerts
+    .filter(a => filter === 'ALL' ? true : a.status === filter)
     .sort((a, b) => (b.probability - b.eta_hours / 100) - (a.probability - a.eta_hours / 100));
 
   const sentCount = alerts.filter(a => a.status === 'SENT').length;
@@ -345,14 +378,14 @@ const AlertCenter = ({ navigate }) => {
     <PageTransition>
       <div
         className="min-h-screen p-4 sm:p-6 space-y-4 sm:space-y-6"
-        style={{ background: 'linear-gradient(135deg,#000,#080808)' }}
+        style={{ background: isLight ? 'transparent' : 'linear-gradient(135deg,#000,#080808)' }}
       >
 
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <div className="relative">
-              <Bell className="w-5 h-5 sm:w-6 sm:h-6 text-orange-400" />
+              <Bell className="w-5 h-5 sm:w-6 sm:h-6 text-orange-500" />
               {sentCount > 0 && (
                 <motion.span
                   initial={{ scale: 0 }} animate={{ scale: 1 }}
@@ -364,10 +397,10 @@ const AlertCenter = ({ navigate }) => {
               )}
             </div>
             <div>
-              <h1 className="text-xl sm:text-2xl font-black text-white uppercase tracking-tight">
+              <h1 className={`text-xl sm:text-2xl font-black uppercase tracking-tight ${isLight ? 'text-slate-900' : 'text-white'}`}>
                 Alert Center
               </h1>
-              <p className="text-[9px] text-zinc-500 font-bold uppercase">
+              <p className={`text-[9px] font-bold uppercase ${isLight ? 'text-slate-500' : 'text-zinc-500'}`}>
                 Real-time prediction alerts · {displayed.length} shown
               </p>
             </div>
@@ -377,9 +410,12 @@ const AlertCenter = ({ navigate }) => {
             <button
               onClick={() => setSound(s => !s)}
               className={`flex items-center gap-1.5 px-3 py-2 rounded-xl border
-                          text-[9px] font-black uppercase transition-all
-                          ${sound ? 'text-orange-400' : 'border-zinc-700 text-zinc-600'}`}
-              style={sound ? { background: 'rgba(249,115,22,0.1)', border: '1px solid rgba(249,115,22,0.3)' } : {}}
+                          text-[9px] font-black uppercase transition-all ${
+                            sound
+                              ? (isLight ? 'text-orange-700 border-orange-200' : 'text-orange-400')
+                              : (isLight ? 'border-slate-200 text-slate-500' : 'border-zinc-700 text-zinc-600')
+                          }`}
+              style={sound ? { background: 'rgba(249,115,22,0.1)', border: isLight ? '1px solid rgba(249,115,22,0.3)' : '1px solid rgba(249,115,22,0.3)' } : { background: isLight ? '#ffffff' : 'transparent' }}
             >
               {sound ? <Volume2 className="w-3.5 h-3.5" /> : <VolumeX className="w-3.5 h-3.5" />}
               <span className="hidden sm:inline">{sound ? 'Sound On' : 'Muted'}</span>
@@ -387,9 +423,12 @@ const AlertCenter = ({ navigate }) => {
             <button
               onClick={fetchAlerts}
               disabled={loading}
-              className="p-2.5 rounded-xl border border-zinc-800 text-zinc-500
-                         hover:text-orange-400 hover:border-orange-500/30 transition-all active:scale-95"
-              style={{ background: 'rgba(0,0,0,0.6)' }}
+              className={`p-2.5 rounded-xl border transition-all active:scale-95 ${
+                isLight
+                  ? 'bg-white border-slate-200 text-slate-600 hover:text-orange-600 hover:border-orange-200 shadow-sm'
+                  : 'border-zinc-800 text-zinc-500 hover:text-orange-400 hover:border-orange-500/30'
+              }`}
+              style={isLight ? {} : { background: 'rgba(0,0,0,0.6)' }}
             >
               <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
             </button>
@@ -399,7 +438,7 @@ const AlertCenter = ({ navigate }) => {
         {/* Live indicator */}
         <div className="flex items-center gap-2">
           <div className="w-2 h-2 rounded-full bg-orange-500 animate-pulse" />
-          <span className="text-[9px] font-black text-zinc-600 uppercase tracking-widest">
+          <span className={`text-[9px] font-black uppercase tracking-widest ${isLight ? 'text-slate-500' : 'text-zinc-600'}`}>
             Live WebSocket Stream · {alerts.length} total
           </span>
         </div>
@@ -408,8 +447,11 @@ const AlertCenter = ({ navigate }) => {
         {error && !loading && (
           <motion.div
             initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-            className="flex items-center gap-3 px-4 py-3 rounded-xl text-xs text-amber-400"
-            style={{ background: 'rgba(234,179,8,0.08)', border: '1px solid rgba(234,179,8,0.2)' }}
+            className={`flex items-center gap-3 px-4 py-3 rounded-xl text-xs border ${
+              isLight
+                ? 'bg-amber-50 border-amber-200 text-amber-800'
+                : 'bg-yellow-500/10 border-yellow-500/20 text-amber-400'
+            }`}
           >
             <AlertTriangle className="w-4 h-4 flex-shrink-0" />
             <span>Could not load alerts. {typeof error === 'object' ? JSON.stringify(error) : String(error)}</span>
@@ -422,11 +464,15 @@ const AlertCenter = ({ navigate }) => {
             <button
               key={tab}
               onClick={() => setFilter(tab)}
-              className="flex-shrink-0 px-4 py-1.5 rounded-xl text-[9px] font-black uppercase
-                         transition-all touch-feedback"
+              className="flex-shrink-0 px-4 py-1.5 rounded-xl text-[9px] font-black uppercase transition-all touch-feedback"
               style={filter === tab
-                ? { background: 'linear-gradient(135deg,#f97316,#ef4444)', color: '#fff' }
-                : { background: 'rgba(0,0,0,0.5)', border: '1px solid rgba(39,39,42,0.8)', color: '#71717a' }
+                ? { background: 'linear-gradient(135deg,#f97316,#ef4444)', color: '#fff', boxShadow: '0 4px 12px rgba(249,115,22,0.25)' }
+                : {
+                    background: isLight ? '#ffffff' : 'rgba(0,0,0,0.5)',
+                    border: isLight ? '1px solid #e2e8f0' : '1px solid rgba(39,39,42,0.8)',
+                    color: isLight ? '#64748b' : '#71717a',
+                    boxShadow: isLight ? '0 1px 3px rgba(0,0,0,0.04)' : 'none'
+                  }
               }
             >
               {tab}
@@ -466,6 +512,7 @@ const AlertCenter = ({ navigate }) => {
                   onAck={handleAck}
                   onDispatch={handleDispatch}
                   onFalse={handleFalse}
+                  isLight={isLight}
                 />
               ))}
             </div>
@@ -475,7 +522,5 @@ const AlertCenter = ({ navigate }) => {
     </PageTransition>
   );
 };
-
-/* ── Demo data removed — this view renders only real API/WebSocket alerts. ── */
 
 export default AlertCenter;

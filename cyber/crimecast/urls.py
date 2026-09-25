@@ -71,6 +71,7 @@ urlpatterns = [
         path('ai/', include('apps.ml_engine.urls')),
         path('reports/', include('apps.reports.urls')),
         path('complaints/', include('apps.complaints.urls')),
+        path('evidence/', include('apps.complaints.evidence_urls')),
         path('predictions/', include('apps.predictions.urls')),
         path('dashboard/', include('apps.dashboard.urls')),
         path('analytics/', include('apps.dashboard.urls')),

@@ -6,7 +6,10 @@ from .views import (
     ComplaintBulkImportView,
     TransactionChainView,
     VoiceTranscribeAPIView,
-    ValidateIFSCAPIView
+    ValidateIFSCAPIView,
+    EvidenceListCreateAPIView,
+    EvidenceVerifyHashAPIView,
+    Sec91CCTVNoticeAPIView
 )
 
 router = DefaultRouter()
@@ -17,7 +20,11 @@ urlpatterns = [
     path('bulk-import/', ComplaintBulkImportView.as_view(), name='complaint-bulk-import'),
     path('voice-transcribe/', VoiceTranscribeAPIView.as_view(), name='voice-transcribe'),
     path('validate-ifsc/', ValidateIFSCAPIView.as_view(), name='validate-ifsc'),
+    path('evidence/', EvidenceListCreateAPIView.as_view(), name='evidence-list-create'),
+    path('evidence/<uuid:pk>/verify/', EvidenceVerifyHashAPIView.as_view(), name='evidence-verify'),
+    path('evidence/cctv-notice/', Sec91CCTVNoticeAPIView.as_view(), name='evidence-cctv-notice'),
     path('<uuid:pk>/chain/', TransactionChainView.as_view(), name='transaction-chain'),
     path('', include(router.urls)),
 ]
+
 

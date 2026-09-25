@@ -35,10 +35,29 @@ const normalizeUser = (userData) => {
   };
 };
 
+const resolvePathToPage = (pathname) => {
+  if (!pathname) return null;
+  const clean = pathname.replace(/^\/app\/?/, '').replace(/^\//, '').replace(/\/$/, '');
+  if (!clean) return null;
+  if (clean === 'predictions' || clean === 'predictions/map') return 'predictions/heatmap';
+  if (clean === 'freeze' || clean === 'freeze/queue') return 'freeze-ops';
+  return clean;
+};
+
 const App = () => {
   // --- Auth & Session ---
   const [user, setUser] = useState(null); // Never persisted to localStorage — re-hydrated from API on load
-  const [activePage, setActivePage] = useState(() => JSON.parse(localStorage.getItem('cyber_page')) || 'landing');
+  const [activePage, setActivePage] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const fromUrl = resolvePathToPage(window.location.pathname);
+      if (fromUrl) return fromUrl;
+    }
+    try {
+      return JSON.parse(localStorage.getItem('cyber_page')) || 'landing';
+    } catch {
+      return 'landing';
+    }
+  });
   const [isLoading, setIsLoading] = useState(true);
 
   // --- UI State ---
@@ -54,9 +73,26 @@ const App = () => {
   // Redirect to app if user session is re-hydrated
   useEffect(() => {
     if (user && (activePage === 'landing' || activePage === 'login' || activePage === 'register')) {
-      setActivePage('predictions/heatmap');
+      const fromUrl = resolvePathToPage(window.location.pathname);
+      const target = fromUrl || 'predictions/heatmap';
+      setActivePage(target);
+      try {
+        window.history.replaceState({ page: target }, '', `/app/${target}`);
+      } catch {}
     }
   }, [user, activePage]);
+
+  // Sync browser back/forward buttons
+  useEffect(() => {
+    const handlePopState = (e) => {
+      const fromState = e.state?.page;
+      const fromUrl = resolvePathToPage(window.location.pathname);
+      const target = fromState || fromUrl || (user ? 'predictions/heatmap' : 'landing');
+      setActivePage(target);
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, [user]);
 
   useEffect(() => {
     localStorage.setItem('cyber_page', JSON.stringify(activePage));
@@ -133,7 +169,12 @@ const App = () => {
   const handleLogin = useCallback((userData) => {
     const normalizedUser = normalizeUser(userData);
     setUser(normalizedUser);
-    setActivePage('predictions/heatmap');
+    const fromUrl = resolvePathToPage(window.location.pathname);
+    const nextPage = fromUrl || 'predictions/heatmap';
+    setActivePage(nextPage);
+    try {
+      window.history.pushState({ page: nextPage }, '', `/app/${nextPage}`);
+    } catch {}
     wsManager.initialize();
     toast.success(`Access granted: ${normalizedUser.role}`);
   }, []);
@@ -143,6 +184,9 @@ const App = () => {
     localStorage.removeItem('crimecast_demo_user');
     setUser(null);
     setActivePage('landing');
+    try {
+      window.history.pushState({ page: 'landing' }, '', '/');
+    } catch {}
     toast("Protocol terminated", { icon: '🚫' });
   }, []);
 
@@ -153,6 +197,12 @@ const App = () => {
       return;
     }
     setActivePage(page);
+    try {
+      const newPath = page === 'landing' ? '/' : `/app/${page}`;
+      if (window.location.pathname !== newPath) {
+        window.history.pushState({ page }, '', newPath);
+      }
+    } catch {}
   }, [user]);
 
   const markAllAsRead = useCallback(() => {
