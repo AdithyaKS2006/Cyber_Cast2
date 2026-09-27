@@ -103,6 +103,27 @@ for i, z in enumerate(_ZONES_RAW):
     ZONES.append(z_obj)
     ZONE_BY_ID[z_obj["zone_id"]] = z_obj
 
+# Extended Hotspots (Karnataka & Southern Cyber Belt Expansion)
+_EXTENDED_ZONES_RAW = [
+    {"zone_name": "Mysore", "district": "Mysuru", "state": "Karnataka", "lat": 12.3051, "lon": 76.6551, "atm_density": 180, "urban_score": 0.85, "population_band": 5, "hotspot_weight": 5.0}
+]
+
+for i, z in enumerate(_EXTENDED_ZONES_RAW):
+    ext_id = len(_ZONES_RAW) + i + 1  # 41
+    z_obj = {
+        "zone_id": ext_id,
+        "zone_name": z["zone_name"],
+        "district": z["district"],
+        "state": z["state"],
+        "lat": z["lat"],
+        "lon": z["lon"],
+        "atm_density": z["atm_density"],
+        "urban_score": z["urban_score"],
+        "population_band": z["population_band"],
+        "hotspot_weight": z["hotspot_weight"]
+    }
+    ZONE_BY_ID[ext_id] = z_obj
+
 # Curated Candidate ATM Locations per Zone (Satisfies PS 26184 actionable point requirement)
 ZONE_ATM_LOCATIONS = {
     1: [  # Jamtara
@@ -130,6 +151,12 @@ ZONE_ATM_LOCATIONS = {
     9: [  # Mumbai
         {"atm_id": "ATM-BOM-001", "bank": "SBI", "address": "Fort Branch, Horniman Circle, Mumbai", "lat": 19.0735, "lon": 72.8800},
         {"atm_id": "ATM-BOM-002", "bank": "Axis Bank", "address": "Bandra Kurla Complex, Mumbai", "lat": 19.0660, "lon": 72.8680},
+    ],
+    41: [  # Mysore / Mysuru
+        {"atm_id": "ATM-MYS-001", "bank": "SBI", "address": "Sayyaji Rao Road, Near Devaraja Market, Mysuru", "lat": 12.3085, "lon": 76.6532},
+        {"atm_id": "ATM-MYS-002", "bank": "HDFC Bank", "address": "K.R. Circle, Near Town Hall, Mysuru", "lat": 12.3060, "lon": 76.6515},
+        {"atm_id": "ATM-MYS-003", "bank": "Canara Bank", "address": "Temple Road, Gokulam 3rd Stage, Mysuru", "lat": 12.3275, "lon": 76.6265},
+        {"atm_id": "ATM-MYS-004", "bank": "Bank of Baroda", "address": "Vishwa Manava Double Road, Saraswathipuram, Mysuru", "lat": 12.3005, "lon": 76.6340},
     ],
 }
 

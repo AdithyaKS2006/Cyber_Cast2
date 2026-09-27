@@ -322,14 +322,27 @@ class ModelMetricsView(APIView):
         if cached_data:
             return Response(cached_data)
 
-        report_path = Path(settings.BASE_DIR) / 'ml_models' / 'model_metrics.json'
-        if not report_path.exists():
-            report_path = Path(settings.BASE_DIR) / 'ml_models' / 'saved_models' / 'accuracy_report.json'
+        report_path = None
+        for p in [
+            Path(settings.BASE_DIR) / 'ml_models' / 'model_metrics_v2.json',
+            Path(settings.BASE_DIR) / 'ml_models' / 'saved_models' / 'accuracy_report_v2.json',
+            Path(settings.BASE_DIR) / 'ml_models' / 'model_metrics.json',
+            Path(settings.BASE_DIR) / 'ml_models' / 'saved_models' / 'accuracy_report.json',
+        ]:
+            if p.exists():
+                report_path = p
+                break
+
+        if not report_path:
+            return Response(
+                {"error": "metrics unavailable — run training"}, 
+                status=status.HTTP_404_NOT_FOUND
+            )
 
         try:
             with open(report_path) as f:
                 report = json.load(f)
-        except FileNotFoundError:
+        except Exception:
             return Response(
                 {"error": "metrics unavailable — run training"}, 
                 status=status.HTTP_404_NOT_FOUND
@@ -345,21 +358,32 @@ class ModelMetricsView(APIView):
             outcome__in=['INTERCEPTED', 'MISSED', 'FALSE_ALARM']
         ).count()
 
-        # Load SHAP TreeExplainer attributions if available
+        # Load SHAP / Feature Importance attributions if available
         import joblib
-        shap_path = Path(settings.BASE_DIR) / 'ml_models' / 'saved_models' / 'shap_summary.joblib'
         shap_data = {}
-        if shap_path.exists():
+        shap_v2_path = Path(settings.BASE_DIR) / 'ml_models' / 'saved_models' / 'feature_importance_v2.joblib'
+        shap_path = Path(settings.BASE_DIR) / 'ml_models' / 'saved_models' / 'shap_summary.joblib'
+        if shap_v2_path.exists():
+            try:
+                fi_v2 = joblib.load(shap_v2_path)
+                shap_data = fi_v2.get('shap_importance', {})
+            except Exception as e:
+                logger.warning("Could not load v2 feature importance joblib: %s", e)
+        elif shap_path.exists():
             try:
                 shap_data = joblib.load(shap_path)
             except Exception as e:
                 logger.warning("Could not load SHAP joblib: %s", e)
 
         formatted_report = {
-            "dataset_source": report.get("dataset_name", "N/A"),
+            "model_version": report.get("model_version", "v1.0"),
+            "dataset_source": report.get("dataset", report.get("dataset_name", "N/A")),
             "num_zones": report.get("num_classes", 40),
-            "num_features": report.get("num_features", 38),
-            "worst_performing_zones": report.get("worst_performing_zones", []),
+            "num_features": report.get("feature_count", report.get("num_features", 22)),
+            "worst_performing_zones": report.get("worst_zones", report.get("worst_performing_zones", [])),
+            "best_performing_zones": report.get("best_zones", []),
+            "ablation": report.get("ablation", {}),
+            "feature_importance_share": report.get("feature_importance_share", {}),
             "metrics": {
                 "top1": report.get("top1_accuracy", 0) / 100.0,
                 "top3": report.get("top3_accuracy", 0) / 100.0,
@@ -381,7 +405,7 @@ class ModelMetricsView(APIView):
                     "atm_density_1km": 0.096,
                     "velocity_transfers_per_hr": 0.088
                 },
-                "signal_share_pct": report.get("feature_signal_breakdown", {}).get("core_signal_importance_share_pct", 20.48)
+                "signal_share_pct": report.get("feature_importance_share", {}).get("core_signal_7", 48.0)
             }
         }
 

@@ -94,10 +94,14 @@ class ComplaintViewSet(viewsets.ModelViewSet):
         logger.info("Complaint %s created successfully (Victim: %s, District: %s)", complaint.complaint_number, complaint.victim_name, complaint.victim_district)
         # Auto-trigger ML prediction on complaint intake
         try:
-            from apps.predictions.tasks import generate_prediction_task
-            generate_prediction_task.delay(str(complaint.id))
+            from apps.predictions.tasks import generate_prediction_task, run_prediction_pipeline
+            try:
+                generate_prediction_task.delay(str(complaint.id))
+            except Exception as task_err:
+                logger.info('Celery task delay fell back to sync execution: %s', task_err)
+                run_prediction_pipeline(complaint)
         except Exception as exc:
-            logger.warning('Failed to queue prediction task: %s', exc)
+            logger.warning('Failed to run prediction pipeline: %s', exc)
 
 
 class ComplaintStatsView(APIView):

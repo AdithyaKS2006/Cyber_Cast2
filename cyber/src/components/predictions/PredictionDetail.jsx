@@ -7,7 +7,8 @@
 import React, { useState, useEffect } from 'react';
 import {
   ChevronLeft, Zap, MapPin, Clock, CheckCircle,
-  AlertTriangle, Loader2, Shield, TrendingUp, X, Send, UserCheck, Activity, Copy, Check
+  AlertTriangle, Loader2, Shield, TrendingUp, X, Send, UserCheck, Activity, Copy, Check,
+  Radio, Smartphone, Network, Compass, CheckCircle2, Layers
 } from 'lucide-react';
 import apiClient from '../../utils/apiClient';
 import useTheme from '../../hooks/useTheme';
@@ -388,6 +389,301 @@ const IntelligenceDispatch = ({ prediction, onDispatch, dispatching }) => {
   );
 };
 
+/* ── ISP & Telecom Triangulation Panel ────────────────────────────────── */
+const ISPLocationPanel = ({ isp, isLight }) => {
+  const [copied, setCopied] = useState(false);
+  if (!isp) return null;
+
+  const copyCoords = () => {
+    navigator.clipboard.writeText(`${isp.cell_tower_lat}, ${isp.cell_tower_lon}`);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  return (
+    <div className={`rounded-2xl border p-6 space-y-5 transition-all ${
+      isLight ? 'bg-white border-blue-200/80 shadow-sm' : 'border-blue-500/20 bg-blue-950/10 backdrop-blur-xl'
+    }`}>
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="flex items-center gap-2.5">
+          <div className="w-8 h-8 rounded-xl bg-blue-500/10 border border-blue-500/30 flex items-center justify-center text-blue-400 flex-shrink-0">
+            <Radio className="w-4 h-4 animate-pulse text-blue-400" />
+          </div>
+          <div>
+            <h2 className="text-[11px] font-black text-blue-400 uppercase tracking-widest flex items-center gap-2">
+              ISP & Telecom Triangulation
+              <span className="px-2 py-0.5 rounded-full text-[8px] bg-blue-500/20 text-blue-300 border border-blue-500/40">
+                LIVE CDR TELEMETRY
+              </span>
+            </h2>
+            <p className={`text-[10px] ${isLight ? 'text-slate-500' : 'text-zinc-400'}`}>
+              Cell tower sector azimuth & IP gateway matching suspect hardware
+            </p>
+          </div>
+        </div>
+        <button
+          onClick={copyCoords}
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[9px] font-black uppercase transition-all flex-shrink-0 self-start sm:self-auto ${
+            isLight
+              ? 'bg-slate-100 hover:bg-slate-200 text-slate-700'
+              : 'bg-zinc-900/80 hover:bg-zinc-800 text-zinc-300 border border-zinc-700'
+          }`}
+        >
+          {copied ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
+          {copied ? 'Copied Tower Coords' : 'Copy Tower Coords'}
+        </button>
+      </div>
+
+      {/* Grid of telecom attributes */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
+        <div className={`p-3.5 rounded-xl border ${isLight ? 'bg-slate-50 border-slate-200' : 'bg-zinc-900/60 border-zinc-800'}`}>
+          <div className="flex items-center gap-1.5 text-zinc-500 mb-1">
+            <Network className="w-3.5 h-3.5 text-blue-400" />
+            <span className="text-[8px] font-black uppercase">Carrier / ISP</span>
+          </div>
+          <p className={`text-[11px] font-bold ${isLight ? 'text-slate-900' : 'text-white'}`}>{isp.isp_provider}</p>
+          <p className="text-[9px] text-blue-400 font-medium">{isp.telecom_circle}</p>
+        </div>
+
+        <div className={`p-3.5 rounded-xl border ${isLight ? 'bg-slate-50 border-slate-200' : 'bg-zinc-900/60 border-zinc-800'}`}>
+          <div className="flex items-center gap-1.5 text-zinc-500 mb-1">
+            <Radio className="w-3.5 h-3.5 text-cyan-400" />
+            <span className="text-[8px] font-black uppercase">Serving Cell Tower</span>
+          </div>
+          <p className={`text-[11px] font-mono font-bold ${isLight ? 'text-slate-900' : 'text-white'}`}>{isp.cell_tower_id}</p>
+          <p className="text-[9px] text-cyan-400 font-medium">{isp.cell_sector_azimuth}</p>
+        </div>
+
+        <div className={`p-3.5 rounded-xl border ${isLight ? 'bg-slate-50 border-slate-200' : 'bg-zinc-900/60 border-zinc-800'}`}>
+          <div className="flex items-center gap-1.5 text-zinc-500 mb-1">
+            <Compass className="w-3.5 h-3.5 text-orange-400" />
+            <span className="text-[8px] font-black uppercase">Tower Coordinates</span>
+          </div>
+          <p className={`text-[11px] font-mono font-bold ${isLight ? 'text-slate-900' : 'text-white'}`}>
+            {isp.cell_tower_lat}, {isp.cell_tower_lon}
+          </p>
+          <p className="text-[9px] text-orange-400 font-medium">~{isp.tower_to_atm_distance_km} km to target ATM cluster</p>
+        </div>
+
+        <div className={`p-3.5 rounded-xl border ${isLight ? 'bg-slate-50 border-slate-200' : 'bg-zinc-900/60 border-zinc-800'}`}>
+          <div className="flex items-center gap-1.5 text-zinc-500 mb-1">
+            <Smartphone className="w-3.5 h-3.5 text-purple-400" />
+            <span className="text-[8px] font-black uppercase">Tracked Device IMEI</span>
+          </div>
+          <p className={`text-[11px] font-mono font-bold ${isLight ? 'text-slate-900' : 'text-white'}`}>{isp.tracked_imei}</p>
+          <div className="flex items-center gap-1.5 mt-0.5">
+            <span className="text-[8px] px-1.5 py-0.5 rounded bg-purple-500/20 text-purple-300 font-bold">
+              {isp.sim_reuse_count} SIMs Seen
+            </span>
+            <span className="text-[8px] text-zinc-400">Age: {isp.sim_activation_days}d</span>
+          </div>
+        </div>
+
+        <div className={`p-3.5 rounded-xl border ${isLight ? 'bg-slate-50 border-slate-200' : 'bg-zinc-900/60 border-zinc-800'}`}>
+          <div className="flex items-center gap-1.5 text-zinc-500 mb-1">
+            <Network className="w-3.5 h-3.5 text-emerald-400" />
+            <span className="text-[8px] font-black uppercase">Suspect Gateway IP</span>
+          </div>
+          <p className={`text-[11px] font-mono font-bold ${isLight ? 'text-slate-900' : 'text-white'}`}>{isp.gateway_ip}</p>
+          <p className="text-[9px] text-emerald-400 font-medium">{isp.is_vpn_or_proxy ? '⚠️ VPN/Proxy Gateway Detected' : 'Direct ISP Mobile Gateway'}</p>
+        </div>
+
+        <div className={`p-3.5 rounded-xl border ${isLight ? 'bg-slate-50 border-slate-200' : 'bg-zinc-900/60 border-zinc-800'}`}>
+          <div className="flex items-center gap-1.5 text-zinc-500 mb-1">
+            <Activity className="w-3.5 h-3.5 text-rose-400" />
+            <span className="text-[8px] font-black uppercase">Device Burn Profile</span>
+          </div>
+          <p className="text-[11px] font-black text-rose-400">{isp.device_burn_risk}</p>
+          <p className={`text-[9px] ${isLight ? 'text-slate-500' : 'text-zinc-500'}`}>{isp.signal_timestamp}</p>
+        </div>
+      </div>
+
+      {/* Cross link to map */}
+      <div className={`flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3 rounded-xl border ${
+        isLight ? 'bg-blue-50/60 border-blue-200 text-blue-900' : 'bg-blue-950/20 border-blue-800/40 text-blue-200'
+      }`}>
+        <div className="flex items-center gap-2">
+          <span className="text-base">📍</span>
+          <span className="text-[10px] font-bold">
+            Suspect cell sector covers {isp.telecom_circle}. Azimuth orientation intersects candidate cash-out ATM corridor.
+          </span>
+        </div>
+        <a
+          href={`https://www.google.com/maps?q=${isp.cell_tower_lat},${isp.cell_tower_lon}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-[9px] font-black uppercase text-blue-400 hover:text-blue-300 underline underline-offset-2 flex-shrink-0"
+        >
+          View Tower Map ↗
+        </a>
+      </div>
+    </div>
+  );
+};
+
+/* ── Why This Zone? (Attribution Proof Methods) Panel ─────────────────── */
+const MethodExplanationPanel = ({ explanation, isLight }) => {
+  if (!explanation || !explanation.proof_methods) return null;
+
+  return (
+    <div className={`rounded-2xl border p-6 space-y-5 transition-all ${
+      isLight ? 'bg-white border-amber-200/80 shadow-sm' : 'border-amber-500/20 bg-amber-950/10 backdrop-blur-xl'
+    }`}>
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2.5">
+          <div className="w-8 h-8 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 flex-shrink-0">
+            <CheckCircle2 className="w-4 h-4 text-amber-400" />
+          </div>
+          <div>
+            <h2 className="text-[11px] font-black text-amber-400 uppercase tracking-widest flex items-center gap-2">
+              Why This Zone? (Attribution Proof Methods)
+              <span className="px-2 py-0.5 rounded-full text-[8px] bg-amber-500/20 text-amber-300 border border-amber-500/40">
+                5 CORROBORATING METHODS
+              </span>
+            </h2>
+            <p className={`text-[10px] ${isLight ? 'text-slate-500' : 'text-zinc-400'}`}>
+              Mathematical & empirical proof confirming why this specific zone is the right cash-out target
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div className={`p-3.5 rounded-xl border text-[11px] font-medium leading-relaxed ${
+        isLight ? 'bg-amber-50/70 border-amber-200 text-amber-950' : 'bg-amber-900/15 border-amber-700/40 text-amber-200'
+      }`}>
+        <span className="font-black text-amber-400 mr-1.5 uppercase text-[9px] tracking-wider">Verdict:</span>
+        {explanation.primary_verdict}
+      </div>
+
+      {/* 5 Corroborated Methods */}
+      <div className="space-y-3">
+        {explanation.proof_methods.map((method, idx) => (
+          <div
+            key={method.code || idx}
+            className={`p-4 rounded-xl border transition-all ${
+              isLight ? 'bg-slate-50 hover:bg-slate-100/80 border-slate-200' : 'bg-zinc-900/60 hover:bg-zinc-900 border-zinc-800'
+            }`}
+          >
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 mb-1.5">
+              <div className="flex items-center gap-2">
+                <span className="w-5 h-5 rounded-md bg-amber-500/20 text-amber-400 font-black text-[9px] flex items-center justify-center flex-shrink-0">
+                  #{idx + 1}
+                </span>
+                <span className={`text-[11px] font-black uppercase ${isLight ? 'text-slate-900' : 'text-white'}`}>
+                  {method.title}
+                </span>
+              </div>
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-[9px] font-bold text-amber-400 px-2 py-0.5 rounded bg-amber-500/10 border border-amber-500/20">
+                  {method.weight}
+                </span>
+                <span className={`text-[8px] font-black uppercase px-2 py-0.5 rounded ${
+                  method.status === 'ACTIONABLE'
+                    ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30'
+                    : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                }`}>
+                  ✓ {method.status}
+                </span>
+              </div>
+            </div>
+            <p className={`text-[10px] leading-relaxed pl-7 ${isLight ? 'text-slate-600' : 'text-zinc-400'}`}>
+              {method.description}
+            </p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+/* ── Candidate Target ATMs Panel (Micro-GIS Hotspot) ────────────────── */
+const CandidateATMsPanel = ({ atms, isp, isLight }) => {
+  if (!atms || !atms.length) return null;
+
+  return (
+    <div className={`rounded-2xl border p-6 space-y-5 transition-all ${
+      isLight ? 'bg-white border-emerald-200/80 shadow-sm' : 'border-emerald-500/20 bg-emerald-950/10 backdrop-blur-xl'
+    }`}>
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="flex items-center gap-2.5">
+          <div className="w-8 h-8 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 flex-shrink-0">
+            <MapPin className="w-4 h-4 text-emerald-400" />
+          </div>
+          <div>
+            <h2 className="text-[11px] font-black text-emerald-400 uppercase tracking-widest flex items-center gap-2">
+              Micro-GIS Target ATMs
+              <span className="px-2 py-0.5 rounded-full text-[8px] bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
+                {atms.length} CANDIDATE CASH-OUT TERMINALS
+              </span>
+            </h2>
+            <p className={`text-[10px] ${isLight ? 'text-slate-500' : 'text-zinc-400'}`}>
+              High-risk cash dispense terminals pinpointed within serving cell tower coverage zone
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* ATMs List */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+        {atms.map((atm, idx) => {
+          const isPrimary = idx === 0;
+          return (
+            <div
+              key={atm.atm_id || idx}
+              className={`p-4 rounded-xl border relative transition-all ${
+                isPrimary
+                  ? (isLight ? 'bg-emerald-50/80 border-emerald-300 ring-1 ring-emerald-400/40' : 'bg-emerald-900/20 border-emerald-500/50 ring-1 ring-emerald-500/30')
+                  : (isLight ? 'bg-slate-50 border-slate-200' : 'bg-zinc-900/60 border-zinc-800')
+              }`}
+            >
+              <div className="flex items-start justify-between gap-2 mb-1.5">
+                <div className="flex items-center gap-2">
+                  <span className={`px-2 py-0.5 rounded text-[8px] font-black uppercase ${
+                    isPrimary ? 'bg-emerald-500 text-black' : 'bg-zinc-800 text-zinc-300'
+                  }`}>
+                    {isPrimary ? 'PRIMARY TARGET' : `ALT #${idx + 1}`}
+                  </span>
+                  <span className={`text-[11px] font-black ${isLight ? 'text-slate-900' : 'text-white'}`}>
+                    {atm.bank}
+                  </span>
+                </div>
+                <span className="text-[9px] font-mono text-zinc-400">
+                  {atm.atm_id}
+                </span>
+              </div>
+
+              <p className={`text-[10px] mb-2 leading-relaxed ${isLight ? 'text-slate-700' : 'text-zinc-300'}`}>
+                {atm.address}
+              </p>
+
+              <div className="flex items-center justify-between text-[9px] pt-2 border-t border-zinc-800/40">
+                <span className="font-mono text-zinc-500">
+                  {atm.lat}, {atm.lon}
+                </span>
+                {isp && isPrimary ? (
+                  <span className="text-emerald-400 font-bold">
+                    ~{isp.tower_to_atm_distance_km} km to cell tower
+                  </span>
+                ) : null}
+                <a
+                  href={`https://www.google.com/maps/dir/${isp ? `${isp.cell_tower_lat},${isp.cell_tower_lon}` : ''}/${atm.lat},${atm.lon}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-bold text-orange-400 hover:text-orange-300 underline underline-offset-2 ml-auto"
+                >
+                  Direct Route ↗
+                </a>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+};
 
 /* ══ Main Component ════════════════════════════════════════════════════ */
 const PredictionDetail = ({ predictionId, navigate }) => {
@@ -564,6 +860,31 @@ const PredictionDetail = ({ predictionId, navigate }) => {
             onDispatch={handleDispatch} 
           />
 
+          {/* ISP & Telecom Triangulation Panel */}
+          {prediction.isp_telecom_location && (
+            <ISPLocationPanel 
+              isp={prediction.isp_telecom_location} 
+              isLight={isLight} 
+            />
+          )}
+
+          {/* Attribution Proof Methods Explanation */}
+          {prediction.method_explanation && (
+            <MethodExplanationPanel 
+              explanation={prediction.method_explanation} 
+              isLight={isLight} 
+            />
+          )}
+
+          {/* Micro-GIS Target Candidate ATMs Panel */}
+          {prediction.candidate_atms && prediction.candidate_atms.length > 0 && (
+            <CandidateATMsPanel
+              atms={prediction.candidate_atms}
+              isp={prediction.isp_telecom_location}
+              isLight={isLight}
+            />
+          )}
+
           {/* Gemini Investigation Brief */}
           <div className="rounded-2xl border border-orange-500/20 p-6 space-y-4"
                style={{ background: 'rgba(249,115,22,0.03)', backdropFilter: 'blur(12px)' }}>
@@ -614,6 +935,46 @@ const PredictionDetail = ({ predictionId, navigate }) => {
                             background: `linear-gradient(90deg,${color},#ef4444)` }} />
             </div>
           </div>
+
+          {/* Quick ISP Signal Card */}
+          {prediction.isp_telecom_location && (
+            <div className={`rounded-2xl border p-5 space-y-3 ${
+              isLight ? 'bg-white border-blue-200' : 'border-blue-500/20 bg-blue-950/15'
+            }`}>
+              <div className="flex items-center gap-2">
+                <Radio className="w-3.5 h-3.5 text-blue-400 animate-pulse" />
+                <h3 className="text-[10px] font-black text-blue-400 uppercase tracking-widest">
+                  Active Cell Sector
+                </h3>
+              </div>
+              <div className="space-y-1.5 text-[10px]">
+                <div className="flex justify-between">
+                  <span className="text-zinc-500 font-bold">ISP:</span>
+                  <span className={`font-bold ${isLight ? 'text-slate-800' : 'text-zinc-200'}`}>
+                    {prediction.isp_telecom_location.isp_provider}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-zinc-500 font-bold">Cell ID:</span>
+                  <span className="font-mono text-cyan-400 font-bold">
+                    {prediction.isp_telecom_location.cell_tower_id}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-zinc-500 font-bold">Azimuth:</span>
+                  <span className="font-mono text-orange-400 font-bold">
+                    {prediction.isp_telecom_location.cell_sector_azimuth}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-zinc-500 font-bold">Proximity to ATM:</span>
+                  <span className="font-bold text-emerald-400">
+                    ~{prediction.isp_telecom_location.tower_to_atm_distance_km} km
+                  </span>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Zone info */}
           <div className="rounded-2xl border border-zinc-800/60 p-5 space-y-4"

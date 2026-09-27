@@ -1,0 +1,278 @@
+{
+  "top1_pct": 12.5,
+  "top5_pct": 25.0,
+  "cases": [
+    {
+      "id": "CASE-001",
+      "description": "Bangalore IT professional, UPI vishing call, money moved to Jharkhand mule",
+      "expected_zone": "Jamtara",
+      "top5": [
+        {
+          "rank": 1,
+          "zone": "Nuh",
+          "probability": 41.0
+        },
+        {
+          "rank": 2,
+          "zone": "Alwar",
+          "probability": 23.2
+        },
+        {
+          "rank": 3,
+          "zone": "Mathura",
+          "probability": 13.9
+        },
+        {
+          "rank": 4,
+          "zone": "Bharatpur",
+          "probability": 12.1
+        },
+        {
+          "rank": 5,
+          "zone": "Faridabad",
+          "probability": 8.3
+        }
+      ],
+      "correct_top1": false,
+      "correct_top5": false
+    },
+    {
+      "id": "CASE-002",
+      "description": "Delhi businessman, NetBanking NEFT fraud, high value Rs8L, corporate mule",
+      "expected_zone": "Mumbai",
+      "top5": [
+        {
+          "rank": 1,
+          "zone": "Alwar",
+          "probability": 37.6
+        },
+        {
+          "rank": 2,
+          "zone": "Nuh",
+          "probability": 25.9
+        },
+        {
+          "rank": 3,
+          "zone": "Bharatpur",
+          "probability": 13.7
+        },
+        {
+          "rank": 4,
+          "zone": "Mathura",
+          "probability": 10.5
+        },
+        {
+          "rank": 5,
+          "zone": "Hyderabad",
+          "probability": 2.1
+        }
+      ],
+      "correct_top1": false,
+      "correct_top5": false
+    },
+    {
+      "id": "CASE-003",
+      "description": "Chennai housewife, UPI collect request scam, mule in Nuh/Mewat",
+      "expected_zone": "Nuh",
+      "top5": [
+        {
+          "rank": 1,
+          "zone": "Nuh",
+          "probability": 60.0
+        },
+        {
+          "rank": 2,
+          "zone": "Deoghar",
+          "probability": 21.3
+        },
+        {
+          "rank": 3,
+          "zone": "Jamtara",
+          "probability": 6.5
+        },
+        {
+          "rank": 4,
+          "zone": "Alwar",
+          "probability": 4.9
+        },
+        {
+          "rank": 5,
+          "zone": "Mathura",
+          "probability": 2.5
+        }
+      ],
+      "correct_top1": true,
+      "correct_top5": true
+    },
+    {
+      "id": "CASE-004",
+      "description": "Pune teacher, OLX car scam, money flows to Bharatpur",
+      "expected_zone": "Bharatpur",
+      "top5": [
+        {
+          "rank": 1,
+          "zone": "Alwar",
+          "probability": 19.4
+        },
+        {
+          "rank": 2,
+          "zone": "Jamtara",
+          "probability": 19.1
+        },
+        {
+          "rank": 3,
+          "zone": "Nuh",
+          "probability": 17.9
+        },
+        {
+          "rank": 4,
+          "zone": "Mathura",
+          "probability": 15.9
+        },
+        {
+          "rank": 5,
+          "zone": "Bharatpur",
+          "probability": 15.6
+        }
+      ],
+      "correct_top1": false,
+      "correct_top5": true
+    },
+    {
+      "id": "CASE-005",
+      "description": "Mumbai elderly victim, KYC update fraud, SIM swap, mule in Deoghar",
+      "expected_zone": "Deoghar",
+      "top5": [
+        {
+          "rank": 1,
+          "zone": "Nuh",
+          "probability": 35.1
+        },
+        {
+          "rank": 2,
+          "zone": "Alwar",
+          "probability": 28.8
+        },
+        {
+          "rank": 3,
+          "zone": "Bharatpur",
+          "probability": 19.3
+        },
+        {
+          "rank": 4,
+          "zone": "Mathura",
+          "probability": 13.6
+        },
+        {
+          "rank": 5,
+          "zone": "Faridabad",
+          "probability": 1.7
+        }
+      ],
+      "correct_top1": false,
+      "correct_top5": false
+    },
+    {
+      "id": "CASE-006",
+      "description": "Kolkata student, task-based part-time job scam, crypto mule, VPN involved",
+      "expected_zone": "Bengaluru",
+      "top5": [
+        {
+          "rank": 1,
+          "zone": "Hyderabad",
+          "probability": 31.9
+        },
+        {
+          "rank": 2,
+          "zone": "Pune",
+          "probability": 9.7
+        },
+        {
+          "rank": 3,
+          "zone": "Surat",
+          "probability": 7.4
+        },
+        {
+          "rank": 4,
+          "zone": "Visakhapatnam",
+          "probability": 6.9
+        },
+        {
+          "rank": 5,
+          "zone": "Vadodara",
+          "probability": 5.1
+        }
+      ],
+      "correct_top1": false,
+      "correct_top5": false
+    },
+    {
+      "id": "CASE-007",
+      "description": "Hyderabad call center, investment fraud, professional mule network in Delhi NCR",
+      "expected_zone": "New Delhi",
+      "top5": [
+        {
+          "rank": 1,
+          "zone": "Alwar",
+          "probability": 35.4
+        },
+        {
+          "rank": 2,
+          "zone": "Nuh",
+          "probability": 25.8
+        },
+        {
+          "rank": 3,
+          "zone": "Mathura",
+          "probability": 16.0
+        },
+        {
+          "rank": 4,
+          "zone": "Bharatpur",
+          "probability": 15.2
+        },
+        {
+          "rank": 5,
+          "zone": "Faridabad",
+          "probability": 3.4
+        }
+      ],
+      "correct_top1": false,
+      "correct_top5": false
+    },
+    {
+      "id": "CASE-008",
+      "description": "Amritsar farmer, AEPS Aadhaar-enabled micro withdrawal fraud in Giridih",
+      "expected_zone": "Giridih",
+      "top5": [
+        {
+          "rank": 1,
+          "zone": "Alwar",
+          "probability": 38.8
+        },
+        {
+          "rank": 2,
+          "zone": "Bharatpur",
+          "probability": 21.4
+        },
+        {
+          "rank": 3,
+          "zone": "Nuh",
+          "probability": 20.6
+        },
+        {
+          "rank": 4,
+          "zone": "Mathura",
+          "probability": 14.7
+        },
+        {
+          "rank": 5,
+          "zone": "Faridabad",
+          "probability": 1.7
+        }
+      ],
+      "correct_top1": false,
+      "correct_top5": false
+    }
+  ]
+}

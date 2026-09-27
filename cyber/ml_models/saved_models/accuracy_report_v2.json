@@ -1,0 +1,66 @@
+{
+  "model_version": "v2.0-lightgbm-isotonic",
+  "dataset": "fraud_data_clean_v2.csv",
+  "sample_count": 150000,
+  "feature_count": 22,
+  "top1_accuracy": 37.48,
+  "top3_accuracy": 74.44,
+  "top5_accuracy": 87.16,
+  "macro_f1": 0.1858,
+  "macro_precision": 0.281,
+  "macro_recall": 0.1962,
+  "log_loss": 1.7767,
+  "ablation": {
+    "7_signal_only": {
+      "top1": 22.49,
+      "top3": 55.64,
+      "top5": 73.82
+    },
+    "22_features": {
+      "top1": 37.48,
+      "top3": 74.44,
+      "top5": 87.16
+    },
+    "imei_atm_gain_pts": 13.33
+  },
+  "feature_importance_share": {
+    "core_signal_7": 48.0,
+    "imei_device_4": 13.72,
+    "atm_withdrawal_3": 5.45,
+    "transaction_8": 32.83
+  },
+  "worst_zones": [
+    {
+      "zone": "Agra",
+      "f1": 0.0
+    },
+    {
+      "zone": "Nashik",
+      "f1": 0.0
+    },
+    {
+      "zone": "Faridabad",
+      "f1": 0.0
+    }
+  ],
+  "best_zones": [
+    {
+      "zone": "Bengaluru",
+      "f1": 0.6519
+    },
+    {
+      "zone": "Hyderabad",
+      "f1": 0.6009
+    },
+    {
+      "zone": "New Delhi",
+      "f1": 0.5338
+    }
+  ],
+  "laws_implemented": [
+    "Law 1: Victim location independent of cash-out zone (avg dist > 500km)",
+    "Law 2: Mule account age follows 10-day lifecycle (60% under 10 days)",
+    "Law 3: Transfer chain completes in under 4 hours (95% of cases)",
+    "Law 4: Fraud amount is method-specific (UPI/Card/NetBanking/Crypto)"
+  ]
+}

@@ -29,9 +29,14 @@ def run_prediction_pipeline(complaint: Complaint) -> list:
     top5_zones = None
     try:
         from apps.ml_engine.cashout_predictor import get_predictor_instance
-        from apps.ml_engine.fraud_features import FraudFeatureExtractor
+        try:
+            from apps.ml_engine.fraud_features_v2 import FraudFeatureExtractorV2
+            extractor = FraudFeatureExtractorV2()
+        except Exception:
+            from apps.ml_engine.fraud_features import FraudFeatureExtractor
+            extractor = FraudFeatureExtractor()
+
         hops = list(complaint.transaction_hops.all().order_by('hop_number'))
-        extractor = FraudFeatureExtractor()
         features = extractor.extract(complaint, hops)
         predictor = get_predictor_instance()
         result = predictor.predict(features, feature_names=extractor.get_feature_names(), complaint=complaint)

@@ -30,6 +30,12 @@ class CashOutPrediction(models.Model):
     outcome = models.CharField(max_length=50, choices=OUTCOME_CHOICES, default='PENDING')
     gemini_brief = models.TextField(blank=True, default='')   # AI investigation narrative
     
+    # Active Learning & Ground-Truth Confirmation (PRD Section 7)
+    confirmed_by_police = models.BooleanField(default=False)
+    confirmed_zone_name = models.CharField(max_length=255, null=True, blank=True)
+    confirmed_at = models.DateTimeField(null=True, blank=True)
+    confirmed_by_officer = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='confirmed_predictions')
+    
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

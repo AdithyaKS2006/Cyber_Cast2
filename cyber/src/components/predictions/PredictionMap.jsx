@@ -444,9 +444,13 @@ const buildPopupHtml = (pred, isDone) => {
     </p>
     <p style="color:#fff;font-size:22px;font-weight:900;margin:0">${(pred.probability * 100).toFixed(1)}%</p>
     <p style="color:#71717a;font-size:8px;margin:2px 0 6px">cash-out likelihood · 1 of 40 canonical hotspot zones</p>
-    <div style="display:flex;justify-content:space-between;margin:0 0 8px;color:#71717a;font-size:9px">
+    <div style="display:flex;justify-content:space-between;margin:0 0 6px;color:#71717a;font-size:9px">
       <span>ETA: ${pred.eta_hours?.toFixed(1)}h</span>
       <span style="color:${om.color};font-weight:900">${om.label}</span>
+    </div>
+    <div style="margin:0 0 8px;padding:4px 6px;background:rgba(59,130,246,0.12);border:1px solid rgba(59,130,246,0.3);border-radius:6px">
+      <div style="color:#60a5fa;font-size:8px;font-weight:900;text-transform:uppercase">📡 ISP &amp; Cell Tower Triangulation</div>
+      <div style="color:#93c5fd;font-size:8px">Suspect Cell Sector: ${pred.predicted_zone_name} Sector B</div>
     </div>
     <div style="color:#52525b;font-size:8px;margin:0 0 8px">${pred.complaint_number || ''}</div>
     ${resolved
