@@ -1,0 +1,986 @@
+[
+  {
+    "name": "Mandya",
+    "district": "Mandya",
+    "state": "Karnataka",
+    "lat": 12.5218,
+    "lon": 76.8951,
+    "aliases": [
+      "mandya",
+      "mandy",
+      "maddur",
+      "srirangapatna",
+      "pandavapura",
+      "malavalli",
+      "nagamangala",
+      "kr pet"
+    ]
+  },
+  {
+    "name": "Hassan",
+    "district": "Hassan",
+    "state": "Karnataka",
+    "lat": 13.0033,
+    "lon": 76.1004,
+    "aliases": [
+      "hassan",
+      "channarayapatna",
+      "arsikere",
+      "sakleshpur",
+      "holenarasipura",
+      "belur",
+      "al\u016br"
+    ]
+  },
+  {
+    "name": "Mysore",
+    "district": "Mysuru",
+    "state": "Karnataka",
+    "lat": 12.3051,
+    "lon": 76.6551,
+    "aliases": [
+      "mysore",
+      "mysuru",
+      "hunsur",
+      "nanjangud",
+      "t narasipura",
+      "k r nagar"
+    ]
+  },
+  {
+    "name": "Bengaluru",
+    "district": "Bengaluru Urban",
+    "state": "Karnataka",
+    "lat": 12.9716,
+    "lon": 77.5946,
+    "aliases": [
+      "bengaluru",
+      "bangalore",
+      "whitefield",
+      "electronic city",
+      "indiranagar",
+      "koramangala",
+      "hebbal",
+      "marathahalli",
+      "jayanagar",
+      "hsr layout"
+    ]
+  },
+  {
+    "name": "Belgaum",
+    "district": "Belagavi",
+    "state": "Karnataka",
+    "lat": 15.8497,
+    "lon": 74.4977,
+    "aliases": [
+      "belgaum",
+      "belagavi",
+      "gokak",
+      "chikodi",
+      "bailhongal",
+      "athani"
+    ]
+  },
+  {
+    "name": "Mangalore",
+    "district": "Dakshina Kannada",
+    "state": "Karnataka",
+    "lat": 12.9141,
+    "lon": 74.856,
+    "aliases": [
+      "mangalore",
+      "mangaluru",
+      "bantwal",
+      "puttur",
+      "belthangady",
+      "sullia"
+    ]
+  },
+  {
+    "name": "Udupi",
+    "district": "Udupi",
+    "state": "Karnataka",
+    "lat": 13.3409,
+    "lon": 74.7421,
+    "aliases": [
+      "udupi",
+      "manipal",
+      "kundapura",
+      "karkala",
+      "byndoor"
+    ]
+  },
+  {
+    "name": "Tumkur",
+    "district": "Tumakuru",
+    "state": "Karnataka",
+    "lat": 13.3392,
+    "lon": 77.1017,
+    "aliases": [
+      "tumkur",
+      "tumakuru",
+      "sira",
+      "tiptur",
+      "kunigal",
+      "madhugiri"
+    ]
+  },
+  {
+    "name": "Shimoga",
+    "district": "Shivamogga",
+    "state": "Karnataka",
+    "lat": 13.9299,
+    "lon": 75.5681,
+    "aliases": [
+      "shimoga",
+      "shivamogga",
+      "bhadravati",
+      "sagar",
+      "thirthahalli",
+      "shikaripura"
+    ]
+  },
+  {
+    "name": "Bellary",
+    "district": "Ballari",
+    "state": "Karnataka",
+    "lat": 15.1394,
+    "lon": 76.9214,
+    "aliases": [
+      "bellary",
+      "ballari",
+      "sandur",
+      "siruguppa",
+      "kudligi"
+    ]
+  },
+  {
+    "name": "Davangere",
+    "district": "Davanagere",
+    "state": "Karnataka",
+    "lat": 14.4644,
+    "lon": 75.9218,
+    "aliases": [
+      "davangere",
+      "davanagere",
+      "harihar",
+      "channagiri",
+      "honnali"
+    ]
+  },
+  {
+    "name": "Hubli",
+    "district": "Dharwad",
+    "state": "Karnataka",
+    "lat": 15.3647,
+    "lon": 75.124,
+    "aliases": [
+      "hubli",
+      "dharwad",
+      "hubballi",
+      "navalgund",
+      "kalghatgi"
+    ]
+  },
+  {
+    "name": "Gulbarga",
+    "district": "Kalaburagi",
+    "state": "Karnataka",
+    "lat": 17.3297,
+    "lon": 76.8343,
+    "aliases": [
+      "gulbarga",
+      "kalaburagi",
+      "sedam",
+      "aland",
+      "chittapur"
+    ]
+  },
+  {
+    "name": "Bijapur",
+    "district": "Vijayapura",
+    "state": "Karnataka",
+    "lat": 16.8302,
+    "lon": 75.71,
+    "aliases": [
+      "bijapur",
+      "vijayapura",
+      "indi",
+      "sindagi",
+      "basavana bagevadi"
+    ]
+  },
+  {
+    "name": "Raichur",
+    "district": "Raichur",
+    "state": "Karnataka",
+    "lat": 16.2076,
+    "lon": 77.3463,
+    "aliases": [
+      "raichur",
+      "manvi",
+      "sindhanur",
+      "lingasugur",
+      "devadurga"
+    ]
+  },
+  {
+    "name": "Bidar",
+    "district": "Bidar",
+    "state": "Karnataka",
+    "lat": 17.9104,
+    "lon": 77.5199,
+    "aliases": [
+      "bidar",
+      "humnabad",
+      "bhalki",
+      "aurad",
+      "basavakalyan"
+    ]
+  },
+  {
+    "name": "Chikmagalur",
+    "district": "Chikkamagaluru",
+    "state": "Karnataka",
+    "lat": 13.3161,
+    "lon": 75.772,
+    "aliases": [
+      "chikmagalur",
+      "chikkamagaluru",
+      "kadur",
+      "tarikere",
+      "mudigere",
+      "kopp\u0101"
+    ]
+  },
+  {
+    "name": "Coorg",
+    "district": "Kodagu",
+    "state": "Karnataka",
+    "lat": 12.4244,
+    "lon": 75.7382,
+    "aliases": [
+      "coorg",
+      "kodagu",
+      "madikeri",
+      "virajpet",
+      "somwarpet",
+      "kushalnagar"
+    ]
+  },
+  {
+    "name": "Kolar",
+    "district": "Kolar",
+    "state": "Karnataka",
+    "lat": 13.1367,
+    "lon": 78.1291,
+    "aliases": [
+      "kolar",
+      "kgf",
+      "kolar gold fields",
+      "malur",
+      "mulbagal",
+      "srinivaspur"
+    ]
+  },
+  {
+    "name": "Ramanagara",
+    "district": "Ramanagara",
+    "state": "Karnataka",
+    "lat": 12.7209,
+    "lon": 77.2799,
+    "aliases": [
+      "ramanagara",
+      "channapatna",
+      "magadi",
+      "kanakapura",
+      "bidadi"
+    ]
+  },
+  {
+    "name": "Chikkaballapur",
+    "district": "Chikkaballapur",
+    "state": "Karnataka",
+    "lat": 13.4325,
+    "lon": 77.7275,
+    "aliases": [
+      "chikkaballapur",
+      "sidlaghatta",
+      "gauribidanur",
+      "bagepalli",
+      "chintamani"
+    ]
+  },
+  {
+    "name": "Chitradurga",
+    "district": "Chitradurga",
+    "state": "Karnataka",
+    "lat": 14.2251,
+    "lon": 76.398,
+    "aliases": [
+      "chitradurga",
+      "hiriyur",
+      "challakere",
+      "holalkere",
+      "hosadurga"
+    ]
+  },
+  {
+    "name": "Chamarajanagar",
+    "district": "Chamarajanagar",
+    "state": "Karnataka",
+    "lat": 11.9261,
+    "lon": 76.9437,
+    "aliases": [
+      "chamarajanagar",
+      "kollegal",
+      "gundlupet",
+      "yelandur",
+      "hanur"
+    ]
+  },
+  {
+    "name": "Jamtara",
+    "district": "Jamtara",
+    "state": "Jharkhand",
+    "lat": 23.9712,
+    "lon": 86.7972,
+    "aliases": [
+      "jamtara",
+      "karmatanr",
+      "narayanpur",
+      "mihijam",
+      "nala",
+      "kundhit"
+    ]
+  },
+  {
+    "name": "Deoghar",
+    "district": "Deoghar",
+    "state": "Jharkhand",
+    "lat": 24.4826,
+    "lon": 86.697,
+    "aliases": [
+      "deoghar",
+      "madhupur",
+      "jasidih",
+      "sarath",
+      "palojori",
+      "mohanpur"
+    ]
+  },
+  {
+    "name": "Giridih",
+    "district": "Giridih",
+    "state": "Jharkhand",
+    "lat": 24.1856,
+    "lon": 86.309,
+    "aliases": [
+      "giridih",
+      "bengabad",
+      "gandey",
+      "dumri",
+      "pirtandr",
+      "tisri"
+    ]
+  },
+  {
+    "name": "Dhanbad",
+    "district": "Dhanbad",
+    "state": "Jharkhand",
+    "lat": 23.7957,
+    "lon": 86.4304,
+    "aliases": [
+      "dhanbad",
+      "jharia",
+      "katras",
+      "baghmara",
+      "nirsa",
+      "govindpur"
+    ]
+  },
+  {
+    "name": "Ranchi",
+    "district": "Ranchi",
+    "state": "Jharkhand",
+    "lat": 23.3441,
+    "lon": 85.3096,
+    "aliases": [
+      "ranchi",
+      "hatia",
+      "kanke",
+      "ormanjhi",
+      "bundu",
+      "namkum"
+    ]
+  },
+  {
+    "name": "Bokaro",
+    "district": "Bokaro",
+    "state": "Jharkhand",
+    "lat": 23.6693,
+    "lon": 86.1511,
+    "aliases": [
+      "bokaro",
+      "chas",
+      "bermo",
+      "bano",
+      "chandankiyari",
+      "gomia"
+    ]
+  },
+  {
+    "name": "Nuh",
+    "district": "Nuh",
+    "state": "Haryana",
+    "lat": 28.1055,
+    "lon": 76.9998,
+    "aliases": [
+      "nuh",
+      "mewat",
+      "taoru",
+      "punhana",
+      "ferozepur jhirka",
+      "nagina",
+      "pingawan"
+    ]
+  },
+  {
+    "name": "Gurugram",
+    "district": "Gurugram",
+    "state": "Haryana",
+    "lat": 28.4595,
+    "lon": 77.0266,
+    "aliases": [
+      "gurugram",
+      "gurgaon",
+      "manesar",
+      "sohna",
+      "pataudi",
+      "dlf cyber city",
+      "cyber city"
+    ]
+  },
+  {
+    "name": "Faridabad",
+    "district": "Faridabad",
+    "state": "Haryana",
+    "lat": 28.4089,
+    "lon": 77.3178,
+    "aliases": [
+      "faridabad",
+      "ballabhgarh",
+      "nit faridabad",
+      "badkhal",
+      "tigaon"
+    ]
+  },
+  {
+    "name": "Palwal",
+    "district": "Palwal",
+    "state": "Haryana",
+    "lat": 28.1487,
+    "lon": 77.326,
+    "aliases": [
+      "palwal",
+      "hodal",
+      "hathin",
+      "hassanpur"
+    ]
+  },
+  {
+    "name": "Sonipat",
+    "district": "Sonipat",
+    "state": "Haryana",
+    "lat": 28.9931,
+    "lon": 77.0151,
+    "aliases": [
+      "sonipat",
+      "sonepat",
+      "kundli",
+      "rai",
+      "gohana",
+      "ganaur"
+    ]
+  },
+  {
+    "name": "Panipat",
+    "district": "Panipat",
+    "state": "Haryana",
+    "lat": 29.3909,
+    "lon": 76.9635,
+    "aliases": [
+      "panipat",
+      "samalkha",
+      "israna",
+      "madlauda",
+      "bapoli"
+    ]
+  },
+  {
+    "name": "Rohtak",
+    "district": "Rohtak",
+    "state": "Haryana",
+    "lat": 28.8955,
+    "lon": 76.6066,
+    "aliases": [
+      "rohtak",
+      "sampla",
+      "meham",
+      "kalanaur"
+    ]
+  },
+  {
+    "name": "Bharatpur",
+    "district": "Bharatpur",
+    "state": "Rajasthan",
+    "lat": 27.2152,
+    "lon": 77.503,
+    "aliases": [
+      "bharatpur",
+      "deeg",
+      "kaman",
+      "nagar",
+      "kumher",
+      "bayana",
+      "weir"
+    ]
+  },
+  {
+    "name": "Alwar",
+    "district": "Alwar",
+    "state": "Rajasthan",
+    "lat": 27.553,
+    "lon": 76.6346,
+    "aliases": [
+      "alwar",
+      "bhiwadi",
+      "tijara",
+      "kishangarh bas",
+      "behror",
+      "khairthal",
+      "neemrana",
+      "ramgarh"
+    ]
+  },
+  {
+    "name": "Jaipur",
+    "district": "Jaipur",
+    "state": "Rajasthan",
+    "lat": 26.9124,
+    "lon": 75.7873,
+    "aliases": [
+      "jaipur",
+      "sanganer",
+      "mansarovar",
+      "malviya nagar",
+      "vaishali nagar",
+      "amer",
+      "chomu"
+    ]
+  },
+  {
+    "name": "Jodhpur",
+    "district": "Jodhpur",
+    "state": "Rajasthan",
+    "lat": 26.2389,
+    "lon": 73.0243,
+    "aliases": [
+      "jodhpur",
+      "mandore",
+      "osian",
+      "bilara",
+      "pipar city"
+    ]
+  },
+  {
+    "name": "Kota",
+    "district": "Kota",
+    "state": "Rajasthan",
+    "lat": 25.2138,
+    "lon": 75.8648,
+    "aliases": [
+      "kota",
+      "ladpura",
+      "sangod",
+      "ramganj mandi"
+    ]
+  },
+  {
+    "name": "Udaipur",
+    "district": "Udaipur",
+    "state": "Rajasthan",
+    "lat": 24.5854,
+    "lon": 73.7125,
+    "aliases": [
+      "udaipur",
+      "mavli",
+      "vallabhnagar",
+      "girwa",
+      "salumbar"
+    ]
+  },
+  {
+    "name": "Mathura",
+    "district": "Mathura",
+    "state": "Uttar Pradesh",
+    "lat": 27.4924,
+    "lon": 77.6737,
+    "aliases": [
+      "mathura",
+      "vrindavan",
+      "govardhan",
+      "barsana",
+      "chhata",
+      "mant"
+    ]
+  },
+  {
+    "name": "Varanasi",
+    "district": "Varanasi",
+    "state": "Uttar Pradesh",
+    "lat": 25.3176,
+    "lon": 82.9739,
+    "aliases": [
+      "varanasi",
+      "kashi",
+      "banaras",
+      "ramnagar",
+      "sarnath",
+      "pindra"
+    ]
+  },
+  {
+    "name": "Prayagraj",
+    "district": "Prayagraj",
+    "state": "Uttar Pradesh",
+    "lat": 25.4358,
+    "lon": 81.8463,
+    "aliases": [
+      "prayagraj",
+      "allahabad",
+      "phulpur",
+      "soron",
+      "koraon",
+      "karchhana",
+      "handia",
+      "civil lines prayagraj"
+    ]
+  },
+  {
+    "name": "Lucknow",
+    "district": "Lucknow",
+    "state": "Uttar Pradesh",
+    "lat": 26.8467,
+    "lon": 80.9462,
+    "aliases": [
+      "lucknow",
+      "gomti nagar",
+      "aliganj",
+      "hazratganj",
+      "indira nagar",
+      "charbagh"
+    ]
+  },
+  {
+    "name": "Noida",
+    "district": "Gautam Buddha Nagar",
+    "state": "Uttar Pradesh",
+    "lat": 28.5355,
+    "lon": 77.391,
+    "aliases": [
+      "noida",
+      "greater noida",
+      "gautam buddha nagar",
+      "dadri",
+      "jewar"
+    ]
+  },
+  {
+    "name": "Ghaziabad",
+    "district": "Ghaziabad",
+    "state": "Uttar Pradesh",
+    "lat": 28.6692,
+    "lon": 77.4538,
+    "aliases": [
+      "ghaziabad",
+      "indirapuram",
+      "vaishali",
+      "sahibabad",
+      "modinagar",
+      "loni"
+    ]
+  },
+  {
+    "name": "Agra",
+    "district": "Agra",
+    "state": "Uttar Pradesh",
+    "lat": 27.1767,
+    "lon": 78.0081,
+    "aliases": [
+      "agra",
+      "fatehabad",
+      "kheragarh",
+      "etmadpur",
+      "bah"
+    ]
+  },
+  {
+    "name": "Kanpur",
+    "district": "Kanpur Nagar",
+    "state": "Uttar Pradesh",
+    "lat": 26.4499,
+    "lon": 80.3319,
+    "aliases": [
+      "kanpur",
+      "kanpur nagar",
+      "kalyanpur",
+      "govind nagar",
+      "civil lines kanpur"
+    ]
+  },
+  {
+    "name": "New Delhi",
+    "district": "New Delhi",
+    "state": "Delhi",
+    "lat": 28.6139,
+    "lon": 77.209,
+    "aliases": [
+      "new delhi",
+      "delhi",
+      "connaught place",
+      "cp",
+      "chanakyapuri",
+      "rajiv chowk",
+      "south delhi",
+      "north delhi",
+      "rohini",
+      "dwarka",
+      "janakpuri",
+      "lajpat nagar",
+      "saket"
+    ]
+  },
+  {
+    "name": "Mumbai",
+    "district": "Mumbai",
+    "state": "Maharashtra",
+    "lat": 19.076,
+    "lon": 72.8777,
+    "aliases": [
+      "mumbai",
+      "bombay",
+      "bandra",
+      "andheri",
+      "bkc",
+      "fort",
+      "dadar",
+      "borivali",
+      "colaba",
+      "juhu",
+      "kurla",
+      "thane",
+      "navi mumbai",
+      "vashi"
+    ]
+  },
+  {
+    "name": "Pune",
+    "district": "Pune",
+    "state": "Maharashtra",
+    "lat": 18.5204,
+    "lon": 73.8567,
+    "aliases": [
+      "pune",
+      "hinjewadi",
+      "kothrud",
+      "vimannagar",
+      "wakad",
+      "baner",
+      "hadapsar",
+      "shivajinagar",
+      "pimpri chinchwad"
+    ]
+  },
+  {
+    "name": "Nagpur",
+    "district": "Nagpur",
+    "state": "Maharashtra",
+    "lat": 21.1458,
+    "lon": 79.0882,
+    "aliases": [
+      "nagpur",
+      "sitabuldi",
+      "dharampeth",
+      "hingna",
+      "kamptee"
+    ]
+  },
+  {
+    "name": "Nashik",
+    "district": "Nashik",
+    "state": "Maharashtra",
+    "lat": 19.9975,
+    "lon": 73.7898,
+    "aliases": [
+      "nashik",
+      "nasik",
+      "panchavati",
+      "cidco",
+      "deolali",
+      "satpur"
+    ]
+  },
+  {
+    "name": "Hyderabad",
+    "district": "Hyderabad",
+    "state": "Telangana",
+    "lat": 17.385,
+    "lon": 78.4867,
+    "aliases": [
+      "hyderabad",
+      "hitec city",
+      "gachibowli",
+      "madhapur",
+      "secunderabad",
+      "kukatpally",
+      "banjara hills",
+      "jubilee hills",
+      "ameerpet",
+      "dilsukhnagar"
+    ]
+  },
+  {
+    "name": "Visakhapatnam",
+    "district": "Visakhapatnam",
+    "state": "Andhra Pradesh",
+    "lat": 17.6868,
+    "lon": 83.2185,
+    "aliases": [
+      "visakhapatnam",
+      "vizag",
+      "gajuwaka",
+      "madhurawada",
+      "mvp colony"
+    ]
+  },
+  {
+    "name": "Vijayawada",
+    "district": "NTR",
+    "state": "Andhra Pradesh",
+    "lat": 16.5062,
+    "lon": 80.648,
+    "aliases": [
+      "vijayawada",
+      "benz circle",
+      "gannavaram",
+      "amaravati",
+      "ntr district"
+    ]
+  },
+  {
+    "name": "Tirupati",
+    "district": "Tirupati",
+    "state": "Andhra Pradesh",
+    "lat": 13.6288,
+    "lon": 79.4192,
+    "aliases": [
+      "tirupati",
+      "chittoor",
+      "renigunta",
+      "chandragiri",
+      "srikalahasti"
+    ]
+  },
+  {
+    "name": "Chennai",
+    "district": "Chennai",
+    "state": "Tamil Nadu",
+    "lat": 13.0827,
+    "lon": 80.2707,
+    "aliases": [
+      "chennai",
+      "madras",
+      "t nagar",
+      "omr",
+      "velachery",
+      "anna nagar",
+      "adyar",
+      "mylapore",
+      "guindy",
+      "porur"
+    ]
+  },
+  {
+    "name": "Coimbatore",
+    "district": "Coimbatore",
+    "state": "Tamil Nadu",
+    "lat": 11.0168,
+    "lon": 76.9558,
+    "aliases": [
+      "coimbatore",
+      "gandhipuram",
+      "rs puram",
+      "peelamedu",
+      "singanallur"
+    ]
+  },
+  {
+    "name": "Madurai",
+    "district": "Madurai",
+    "state": "Tamil Nadu",
+    "lat": 9.9252,
+    "lon": 78.1198,
+    "aliases": [
+      "madurai",
+      "annasamy",
+      "simmakkal",
+      "thiruparankundram"
+    ]
+  },
+  {
+    "name": "Kolkata",
+    "district": "Kolkata",
+    "state": "West Bengal",
+    "lat": 22.5726,
+    "lon": 88.3639,
+    "aliases": [
+      "kolkata",
+      "calcutta",
+      "salt lake",
+      "new town",
+      "howrah",
+      "park street",
+      "dum dum",
+      "alipore"
+    ]
+  },
+  {
+    "name": "Patna",
+    "district": "Patna",
+    "state": "Bihar",
+    "lat": 25.5941,
+    "lon": 85.1376,
+    "aliases": [
+      "patna",
+      "danapur",
+      "kankarbagh",
+      "bailey road",
+      "patliputra",
+      "rajendra nagar"
+    ]
+  },
+  {
+    "name": "Gaya",
+    "district": "Gaya",
+    "state": "Bihar",
+    "lat": 24.7914,
+    "lon": 85.0002,
+    "aliases": [
+      "gaya",
+      "bodh gaya",
+      "sherghati",
+      "tekari"
+    ]
+  }
+]

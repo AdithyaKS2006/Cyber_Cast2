@@ -134,30 +134,46 @@ class CashOutPredictor:
             return []
 
         # Layer 2 Spatial & Telecom Corroboration (PRD Section 6 & 9)
-        # When complaint narrative, suspect telemetry, or hops indicate Mysore or an extended zone,
-        # corroborate that zone to Rank 1 with calibrated high probability.
+        # Uses Universal GeoResolver to detect ANY Indian district or town in complaint telemetry
+        # (e.g. Mandya, Hassan, Mysore, Belgaum, Varanasi, Jamtara, etc.)
         telecom_target_zone = None
         if complaint:
-            desc = f"{getattr(complaint, 'description', '')} {getattr(complaint, 'narrative_text', '')}".lower()
-            addr = (getattr(complaint, 'suspect_address', '') or '').lower()
-            v_dist = (getattr(complaint, 'victim_district', '') or '').lower()
-            v_state = (getattr(complaint, 'victim_state', '') or '').lower()
-            
-            # Also check transaction hops for Mysore
-            hops_text = ""
             try:
-                for h in complaint.transaction_hops.all():
-                    hops_text += f" {getattr(h, 'location_name', '')} {getattr(h, 'to_bank', '')}".lower()
-            except Exception:
-                pass
-            
-            # Check for Mysore / Mysuru telemetry
-            if any(term in desc or term in addr or term in v_dist or term in hops_text for term in ['mysore', 'mysuru']):
-                telecom_target_zone = ZONE_BY_ID.get(41)
+                from apps.ml_engine.geo_resolver import GeoResolver
+                geo_match = GeoResolver.get_instance().detect_telecom_zone(complaint)
+                if geo_match:
+                    z_name = geo_match['name']
+                    # Check if matches existing registered zone
+                    matched_zid = None
+                    for zid, z in ZONE_BY_ID.items():
+                        if z['zone_name'].lower() == z_name.lower():
+                            matched_zid = zid
+                            break
+
+                    telecom_target_zone = {
+                        "zone_id": matched_zid if matched_zid else (1000 + abs(hash(z_name)) % 8999),
+                        "zone_name": z_name,
+                        "district": geo_match.get('district', z_name),
+                        "state": geo_match.get('state', 'India'),
+                        "lat": geo_match['lat'],
+                        "lon": geo_match['lon'],
+                        "atm_density": 150,
+                        "urban_score": 0.80,
+                        "population_band": 4,
+                        "hotspot_weight": 5.0
+                    }
+            except Exception as geo_err:
+                logger.warning(f"GeoResolver detection error: {geo_err}")
 
         if telecom_target_zone:
-            candidate_atms = get_candidate_atms_for_zone(telecom_target_zone["zone_id"])
-            dbscan_clusters = get_dbscan_micro_clusters(telecom_target_zone["zone_id"])
+            from apps.ml_engine.dynamic_atms import get_dynamic_candidate_atms, get_dynamic_dbscan_clusters
+            candidate_atms = get_dynamic_candidate_atms(
+                telecom_target_zone["lat"],
+                telecom_target_zone["lon"],
+                telecom_target_zone["zone_name"],
+                telecom_target_zone.get("state", "India")
+            )
+            dbscan_clusters = get_dynamic_dbscan_clusters(candidate_atms)
             eta_val = self._estimate_eta(telecom_target_zone, complaint)
 
             corroborated_pred = {
@@ -171,7 +187,7 @@ class CashOutPredictor:
                 "probability": 0.8450,
                 "eta_hours": eta_val,
                 "interdiction_window_hours": eta_val,
-                "spatial_architecture": "Layer 2 Spatial Telecom Corroboration + DBSCAN Micro GIS",
+                "spatial_architecture": "Layer 2 Universal Geo-Resolution + Dynamic Micro-GIS",
                 "candidate_atms": candidate_atms,
                 "dbscan_clusters": dbscan_clusters
             }
