@@ -939,6 +939,45 @@
     ]
   },
   {
+    "name": "Goa",
+    "district": "North Goa",
+    "state": "Goa",
+    "lat": 15.4909,
+    "lon": 73.8278,
+    "aliases": [
+      "goa",
+      "panaji",
+      "panjim",
+      "north goa",
+      "calangute",
+      "candolim",
+      "baga",
+      "mapusa",
+      "porvorim",
+      "anjuna",
+      "vagator",
+      "old goa"
+    ]
+  },
+  {
+    "name": "Margao",
+    "district": "South Goa",
+    "state": "Goa",
+    "lat": 15.2832,
+    "lon": 73.9862,
+    "aliases": [
+      "margao",
+      "madgaon",
+      "south goa",
+      "vasco",
+      "vasco da gama",
+      "mormugao",
+      "colva",
+      "benaulim",
+      "canacona"
+    ]
+  },
+  {
     "name": "Kolkata",
     "district": "Kolkata",
     "state": "West Bengal",

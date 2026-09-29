@@ -82,6 +82,10 @@ DISTRICTS = [
     {"name": "Coimbatore", "district": "Coimbatore", "state": "Tamil Nadu", "lat": 11.0168, "lon": 76.9558, "aliases": ["coimbatore", "gandhipuram", "rs puram", "peelamedu", "singanallur"]},
     {"name": "Madurai", "district": "Madurai", "state": "Tamil Nadu", "lat": 9.9252, "lon": 78.1198, "aliases": ["madurai", "annasamy", "simmakkal", "thiruparankundram"]},
 
+    # Goa
+    {"name": "Goa", "district": "North Goa", "state": "Goa", "lat": 15.4909, "lon": 73.8278, "aliases": ["goa", "panaji", "panjim", "north goa", "calangute", "candolim", "baga", "mapusa", "porvorim", "anjuna", "vagator", "old goa"]},
+    {"name": "Margao", "district": "South Goa", "state": "Goa", "lat": 15.2832, "lon": 73.9862, "aliases": ["margao", "madgaon", "south goa", "vasco", "vasco da gama", "mormugao", "colva", "benaulim", "canacona"]},
+
     # West Bengal & Bihar
     {"name": "Kolkata", "district": "Kolkata", "state": "West Bengal", "lat": 22.5726, "lon": 88.3639, "aliases": ["kolkata", "calcutta", "salt lake", "new town", "howrah", "park street", "dum dum", "alipore"]},
     {"name": "Patna", "district": "Patna", "state": "Bihar", "lat": 25.5941, "lon": 85.1376, "aliases": ["patna", "danapur", "kankarbagh", "bailey road", "patliputra", "rajendra nagar"]},

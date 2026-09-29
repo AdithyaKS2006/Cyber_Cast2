@@ -82,9 +82,9 @@ class GeoResolver:
         if clean_query in self._alias_map:
             return dict(self._alias_map[clean_query])
 
-        # 2. Substring scan across canonical district alias keywords
+        # 2. Substring scan across canonical district alias keywords (min len 3 to support Goa, Nuh, Leh, etc.)
         for alias, d in self._alias_map.items():
-            if len(alias) >= 4 and re.search(r'\b' + re.escape(alias) + r'\b', clean_query):
+            if len(alias) >= 3 and re.search(r'\b' + re.escape(alias) + r'\b', clean_query):
                 return dict(d)
 
         # 3. Cache lookup
@@ -121,41 +121,133 @@ class GeoResolver:
 
         return None
 
+    def _extract_contextual_location(self, text: str, victim_district: str = None):
+        """
+        Extracts geographic entities from narrative/telecom text using criminological
+        context scoring (suspect/mule/CDR/ATM indicators vs victim indicators).
+        Implements Law 1 (Geographic Separation Law).
+        """
+        if not text:
+            return None
+
+        clean = text.lower()
+        SUSPECT_KEYWORDS = {
+            "suspect", "mule", "cdr", "cell", "tower", "telecom", "triangulat",
+            "corridor", "routed", "atm", "cash", "withdrawn", "active", "session",
+            "gateway", "ip", "imei", "hop", "near", "location", "circle"
+        }
+        VICTIM_KEYWORDS = {
+            "victim", "complainant", "targeted", "reported", "filed", "residing", "native", "from"
+        }
+
+        candidates = {}
+        for alias, d in self._alias_map.items():
+            if len(alias) >= 3:
+                for match in re.finditer(r'\b' + re.escape(alias) + r'\b', clean):
+                    start, end = match.span()
+                    # 60 character contextual window around match
+                    window = clean[max(0, start - 60):min(len(clean), end + 60)]
+                    score = 1  # base detection score
+                    for kw in SUSPECT_KEYWORDS:
+                        if kw in window:
+                            score += 3
+                    for kw in VICTIM_KEYWORDS:
+                        if kw in window:
+                            score -= 2
+
+                    d_name = d["name"]
+                    # Law 1: Penalize victim district if there are other candidate cashout zones
+                    if victim_district and (victim_district.lower() in alias or alias in victim_district.lower()):
+                        score -= 5
+
+                    if d_name not in candidates or candidates[d_name]["score"] < score:
+                        candidates[d_name] = {"geo": dict(d), "score": score, "alias": alias}
+
+        if candidates:
+            sorted_candidates = sorted(candidates.values(), key=lambda x: x["score"], reverse=True)
+            top = sorted_candidates[0]
+            # If top candidate has positive contextual score or is the only candidate, choose it
+            if top["score"] > 0 or len(sorted_candidates) == 1:
+                return top["geo"]
+
+        return None
+
     def detect_telecom_zone(self, complaint):
         """
-        Scans a complaint for location keywords in narrative, suspect address,
-        transaction hops, or victim location, and returns resolved zone info.
+        Scans a complaint for location keywords, suspect bank IFSC codes,
+        transaction hops, or telecom CDR markers, and returns resolved zone info.
         """
         if not complaint:
             return None
 
-        texts = []
-        if hasattr(complaint, 'narrative_text') and complaint.narrative_text:
-            texts.append(complaint.narrative_text)
-        if hasattr(complaint, 'description') and complaint.description:
-            texts.append(complaint.description)
-        if hasattr(complaint, 'suspect_address') and complaint.suspect_address:
-            texts.append(complaint.suspect_address)
+        # 1. Check for official RBI Bank IFSC code in suspect account, bank, narrative or hops
+        searchable_strings = []
+        if getattr(complaint, 'suspect_bank', None):
+            searchable_strings.append(str(complaint.suspect_bank))
+        if getattr(complaint, 'suspect_account_number', None):
+            searchable_strings.append(str(complaint.suspect_account_number))
+        if getattr(complaint, 'narrative_text', None):
+            searchable_strings.append(str(complaint.narrative_text))
+        if getattr(complaint, 'description', None):
+            searchable_strings.append(str(complaint.description))
 
-        # Transaction hops
         try:
             for h in complaint.transaction_hops.all():
-                if getattr(h, 'location_name', None):
-                    texts.append(h.location_name)
+                if getattr(h, 'to_ifsc', None):
+                    searchable_strings.append(str(h.to_ifsc))
+                if getattr(h, 'from_ifsc', None):
+                    searchable_strings.append(str(h.from_ifsc))
                 if getattr(h, 'to_bank', None):
-                    texts.append(h.to_bank)
+                    searchable_strings.append(str(h.to_bank))
+                if getattr(h, 'location_name', None):
+                    searchable_strings.append(str(h.location_name))
         except Exception:
             pass
 
-        full_corpus = " ".join(texts)
+        full_corpus = " ".join(searchable_strings)
 
-        # First scan for high-priority telecom signals in the narrative/suspect info
+        # Detect IFSC pattern: e.g. HDFC0000059, SBIN0000567, etc.
+        ifsc_matches = re.findall(r'\b([A-Z]{4}0[A-Z0-9]{6})\b', full_corpus.upper())
+        if ifsc_matches:
+            from apps.complaints.rbi_directory import validate_ifsc
+            for ifsc_candidate in ifsc_matches:
+                ifsc_info = validate_ifsc(ifsc_candidate)
+                if ifsc_info.get("is_valid") and ifsc_info.get("lat") and ifsc_info.get("lon"):
+                    z_name = ifsc_info.get("city") or ifsc_info.get("district") or ifsc_info.get("branch")
+                    return {
+                        "name": z_name.title(),
+                        "district": str(ifsc_info.get("district", z_name)).title(),
+                        "state": str(ifsc_info.get("state", "India")).title(),
+                        "lat": ifsc_info["lat"],
+                        "lon": ifsc_info["lon"],
+                        "source": f"RBI IFSC Directory ({ifsc_candidate})"
+                    }
+
+        # 2. Contextual extraction from narrative corpus (distinguishing suspect footprint vs victim)
+        v_dist = getattr(complaint, 'victim_district', None)
+        context_geo = self._extract_contextual_location(full_corpus, victim_district=v_dist)
+        if context_geo:
+            return context_geo
+
+        # 3. Direct corpus resolve
         resolved = self.resolve(full_corpus)
         if resolved:
             return resolved
 
-        # Otherwise check victim district
-        v_dist = getattr(complaint, 'victim_district', None)
+        # 4. Check suspect bank text only if it has geographic indicators (ignore generic bank acronyms)
+        if getattr(complaint, 'suspect_bank', None):
+            bank_str = str(complaint.suspect_bank).strip().lower()
+            generic_bank_terms = {
+                "sbi", "sbin", "hdfc", "icici", "axis", "pnb", "bob", "canara", 
+                "bank", "kotak", "yes bank", "union bank", "state bank of india", 
+                "punjab national bank", "bank of baroda", "central bank"
+            }
+            if bank_str not in generic_bank_terms and len(bank_str) > 3:
+                bank_geo = self.resolve(str(complaint.suspect_bank))
+                if bank_geo:
+                    return bank_geo
+
+        # 5. Otherwise fallback to victim district
         if v_dist:
             return self.resolve(v_dist)
 

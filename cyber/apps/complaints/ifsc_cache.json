@@ -1,0 +1,15 @@
+{
+  "HDFC0000059": {
+    "is_valid": true,
+    "ifsc": "HDFC0000059",
+    "bank_code": "HDFC",
+    "bank_name": "HDFC Bank",
+    "branch": "GOA - PANJIM",
+    "city": "NORTH GOA",
+    "district": "PANAJI",
+    "state": "GOA",
+    "address": "18TH JUNE ROADNEAR MATHAIS PLAZAPANJIMGOA403 001",
+    "lat": 15.4909,
+    "lon": 73.8278
+  }
+}

@@ -1,0 +1,34 @@
+[
+  {
+    "atm_id": "ATM-GOA-001",
+    "bank": "State Bank of India",
+    "address": "Dayanand Bandodkar Marg, Near Mandovi Promenade, Panaji, Goa, Goa",
+    "lat": 15.4941,
+    "lon": 73.8299,
+    "source": "Municipal Registry"
+  },
+  {
+    "atm_id": "ATM-GOA-002",
+    "bank": "HDFC Bank",
+    "address": "18th June Road, Near Municipal Market, Panaji, Goa, Goa",
+    "lat": 15.4864,
+    "lon": 73.824,
+    "source": "Municipal Registry"
+  },
+  {
+    "atm_id": "ATM-GOA-003",
+    "bank": "Bank of Baroda",
+    "address": "MG Road, Altinho, Panaji, Goa, Goa",
+    "lat": 15.4971,
+    "lon": 73.8237,
+    "source": "Municipal Registry"
+  },
+  {
+    "atm_id": "ATM-GOA-004",
+    "bank": "Canara Bank",
+    "address": "Near Garcia de Orta Garden, Church Square, Panaji, Goa, Goa",
+    "lat": 15.4881,
+    "lon": 73.8333,
+    "source": "Municipal Registry"
+  }
+]

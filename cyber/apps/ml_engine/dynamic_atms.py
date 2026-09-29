@@ -138,6 +138,24 @@ def _generate_regional_atms(lat: float, lon: float, district_name: str, state_na
             ("Bank of Baroda", "Cantonment Station Road, Varanasi"),
             ("Punjab National Bank", "Bhelupur Main Road, Varanasi"),
             ("HDFC Bank", "Sigra Commercial Complex, Varanasi"),
+        ],
+        "goa": [
+            ("State Bank of India", "Dayanand Bandodkar Marg, Near Mandovi Promenade, Panaji, Goa"),
+            ("HDFC Bank", "18th June Road, Near Municipal Market, Panaji, Goa"),
+            ("Bank of Baroda", "MG Road, Altinho, Panaji, Goa"),
+            ("Canara Bank", "Near Garcia de Orta Garden, Church Square, Panaji, Goa"),
+        ],
+        "north goa": [
+            ("State Bank of India", "Dayanand Bandodkar Marg, Near Mandovi Promenade, Panaji, Goa"),
+            ("HDFC Bank", "18th June Road, Near Municipal Market, Panaji, Goa"),
+            ("Bank of Baroda", "MG Road, Altinho, Panaji, Goa"),
+            ("Canara Bank", "Near Garcia de Orta Garden, Church Square, Panaji, Goa"),
+        ],
+        "south goa": [
+            ("State Bank of India", "Station Road, Near Railway Station, Margao, Goa"),
+            ("HDFC Bank", "Luis Miranda Road, Margao, Goa"),
+            ("Bank of Baroda", "Pajifond, Near Municipal Council, Margao, Goa"),
+            ("Canara Bank", "Abade Faria Road, Margao, Goa"),
         ]
     }
 
