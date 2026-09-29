@@ -94,7 +94,7 @@ class GeoResolver:
         # 4. Fallback to OpenStreetMap Nominatim (timeout 2s)
         try:
             encoded = urllib.parse.quote(f"{clean_query}, India")
-            url = f"https://nominatim.openstreetmap.org/search?q={encoded}&format=json&countrycodes=in&limit=1"
+            url = f"https://nominatim.openstreetmap.org/search?q={encoded}&format=json&countrycodes=in&limit=1&addressdetails=1"
             req = urllib.request.Request(
                 url,
                 headers={"User-Agent": "CrimeCast-Predictive-Cyber-Intelligence/3.0"}
@@ -104,10 +104,13 @@ class GeoResolver:
                     data = json.loads(response.read().decode('utf-8'))
                     if data and len(data) > 0:
                         top = data[0]
+                        addr = top.get('address', {})
+                        detected_state = addr.get('state') or addr.get('state_district') or "India"
+                        detected_district = addr.get('state_district') or addr.get('county') or clean_query.title()
                         res = {
                             "name": clean_query.title(),
-                            "district": clean_query.title(),
-                            "state": "India",
+                            "district": detected_district,
+                            "state": detected_state,
                             "lat": round(float(top['lat']), 4),
                             "lon": round(float(top['lon']), 4),
                             "aliases": [clean_query],
@@ -143,6 +146,11 @@ class GeoResolver:
         candidates = {}
         for alias, d in self._alias_map.items():
             if len(alias) >= 3:
+                # Law 1: Exclude victim district from suspect cash-out zone candidate matching
+                # (Fallback to victim district is handled separately at the end if no suspect footprint exists)
+                if victim_district and (victim_district.lower() in alias or alias in victim_district.lower()):
+                    continue
+
                 for match in re.finditer(r'\b' + re.escape(alias) + r'\b', clean):
                     start, end = match.span()
                     # 60 character contextual window around match
@@ -156,19 +164,57 @@ class GeoResolver:
                             score -= 2
 
                     d_name = d["name"]
-                    # Law 1: Penalize victim district if there are other candidate cashout zones
-                    if victim_district and (victim_district.lower() in alias or alias in victim_district.lower()):
-                        score -= 5
-
                     if d_name not in candidates or candidates[d_name]["score"] < score:
                         candidates[d_name] = {"geo": dict(d), "score": score, "alias": alias}
 
         if candidates:
             sorted_candidates = sorted(candidates.values(), key=lambda x: x["score"], reverse=True)
             top = sorted_candidates[0]
-            # If top candidate has positive contextual score or is the only candidate, choose it
-            if top["score"] > 0 or len(sorted_candidates) == 1:
+            # Only accept candidate if it has positive suspect/telecom context score (> 0)
+            # If the only match was a penalized victim location, allow unknown entity extraction (2b) to proceed
+            if top["score"] > 0:
                 return top["geo"]
+
+        return None
+
+    def _extract_unknown_candidate_entities(self, text: str, victim_district: str = None):
+        """
+        Extracts candidate proper nouns / location phrases following spatial indicators
+        to resolve unseen/unimaginable locations across India via OSM Nominatim.
+        """
+        if not text:
+            return None
+
+        patterns = [
+            r'(?:operating near|sessions near|corridor near|active near|withdrawn at|mule in|located in|active in|sessions in|spotted at|traced to|near)\s+([A-Z][a-zA-Z]+(?:\s+[A-Z][a-zA-Z]+)?)',
+            r'([A-Z][a-zA-Z]+(?:\s+[A-Z][a-zA-Z]+)?)\s+(?:central commercial|commercial corridor|central corridor|commercial hub|market corridor|promenade)'
+        ]
+
+        STOP_WORDS = {
+            "an online", "stolen funds", "live isp", "cell tower", "active suspect",
+            "central commercial", "multiple mule", "telecom zone", "commercial corridor",
+            "investment task", "central bank", "state bank", "bank", "mule account",
+            "payment method", "fraud amount", "online investment", "central telecom",
+            "cdr", "isp", "sim", "imei", "nach", "atm", "pos", "upi", "qr", "otp",
+            "kyc", "fir", "sms", "gps", "gsm", "lte", "4g", "5g", "rbi", "mha", "i4c", "ncrp"
+        }
+
+        candidates = []
+        for pat in patterns:
+            for match in re.finditer(pat, text):
+                cand = match.group(1).strip()
+                c_low = cand.lower()
+                if c_low not in STOP_WORDS and len(cand) >= 3:
+                    if victim_district and (victim_district.lower() in c_low or c_low in victim_district.lower()):
+                        continue  # Law 1: Avoid picking victim's city as suspect zone
+                    candidates.append(cand)
+
+        for candidate in candidates:
+            resolved = self.resolve(candidate)
+            if resolved and resolved.get("lat") and resolved.get("lon"):
+                key = candidate.lower()
+                self._alias_map[key] = resolved
+                return resolved
 
         return None
 
@@ -223,11 +269,16 @@ class GeoResolver:
                         "source": f"RBI IFSC Directory ({ifsc_candidate})"
                     }
 
-        # 2. Contextual extraction from narrative corpus (distinguishing suspect footprint vs victim)
+        # 2a. Contextual extraction from known Indian district catalog
         v_dist = getattr(complaint, 'victim_district', None)
         context_geo = self._extract_contextual_location(full_corpus, victim_district=v_dist)
         if context_geo:
             return context_geo
+
+        # 2b. Universal NLP entity extraction for unknown/unimaginable locations across India
+        unknown_geo = self._extract_unknown_candidate_entities(full_corpus, victim_district=v_dist)
+        if unknown_geo:
+            return unknown_geo
 
         # 3. Direct corpus resolve
         resolved = self.resolve(full_corpus)

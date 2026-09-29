@@ -31,7 +31,7 @@ def haversine(lat1, lon1, lat2, lon2):
     return R * c
 
 
-def get_dynamic_candidate_atms(lat: float, lon: float, district_name: str, state_name: str = "Karnataka", radius_meters: int = 2500):
+def get_dynamic_candidate_atms(lat: float, lon: float, district_name: str, state_name: str = "India", radius_meters: int = 2500):
     """
     Returns candidate ATM locations for ANY resolved Indian district or town.
     Checks disk cache -> queries OSM Overpass -> falls back to realistic street grid.
@@ -81,11 +81,16 @@ def get_dynamic_candidate_atms(lat: float, lon: float, district_name: str, state
                         tags.get('name') or
                         'State Bank of India'
                     )
-                    street = tags.get('addr:street') or tags.get('addr:full') or f"Commercial Road, {district_name}"
+                    street = tags.get('addr:street') or tags.get('addr:full') or "Commercial Road"
+                    addr_parts = [p.strip() for p in [street, district_name, state_name] if p and p.strip() and p.lower() != "india"]
+                    clean_addr = []
+                    for part in addr_parts:
+                        if not clean_addr or part.lower() != clean_addr[-1].lower():
+                            clean_addr.append(part)
                     discovered.append({
                         "atm_id": f"ATM-{d_code}-{idx + 1:03d}",
                         "bank": bank_name,
-                        "address": f"{street}, {district_name}, {state_name}",
+                        "address": ", ".join(clean_addr),
                         "lat": round(float(node['lat']), 4),
                         "lon": round(float(node['lon']), 4),
                         "source": "OpenStreetMap"

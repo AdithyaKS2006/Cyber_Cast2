@@ -1,0 +1,34 @@
+[
+  {
+    "atm_id": "ATM-KAR-001",
+    "bank": "State Bank of India",
+    "address": "Main Bazaar Road, Kargil, India",
+    "lat": 33.8058,
+    "lon": 76.475,
+    "source": "Synthesized Regional Spatial Grid"
+  },
+  {
+    "atm_id": "ATM-KAR-002",
+    "bank": "HDFC Bank",
+    "address": "Station Road Commercial Hub, Kargil, India",
+    "lat": 33.7988,
+    "lon": 76.4695,
+    "source": "Synthesized Regional Spatial Grid"
+  },
+  {
+    "atm_id": "ATM-KAR-003",
+    "bank": "Canara Bank",
+    "address": "Civil Lines Compound, Kargil, India",
+    "lat": 33.8083,
+    "lon": 76.47,
+    "source": "Synthesized Regional Spatial Grid"
+  },
+  {
+    "atm_id": "ATM-KAR-004",
+    "bank": "Bank of Baroda",
+    "address": "GT Road Cross, Kargil, India",
+    "lat": 33.8003,
+    "lon": 76.478,
+    "source": "Synthesized Regional Spatial Grid"
+  }
+]

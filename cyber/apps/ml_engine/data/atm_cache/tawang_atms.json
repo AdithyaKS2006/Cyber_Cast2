@@ -1,0 +1,18 @@
+[
+  {
+    "atm_id": "ATM-TAW-001",
+    "bank": "Canara Bank",
+    "address": "Commercial Road, Tawang",
+    "lat": 27.5923,
+    "lon": 91.8745,
+    "source": "OpenStreetMap"
+  },
+  {
+    "atm_id": "ATM-TAW-002",
+    "bank": "SBI",
+    "address": "Commercial Road, Tawang",
+    "lat": 27.5954,
+    "lon": 91.8697,
+    "source": "OpenStreetMap"
+  }
+]

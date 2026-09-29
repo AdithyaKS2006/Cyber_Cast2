@@ -1,1 +1,79 @@
-{}
+{
+  "tawang": {
+    "name": "Tawang",
+    "district": "Tawang",
+    "state": "India",
+    "lat": 27.5879,
+    "lon": 91.8637,
+    "aliases": [
+      "tawang"
+    ],
+    "is_online_resolved": true
+  },
+  "kargil": {
+    "name": "Kargil",
+    "district": "Kargil",
+    "state": "India",
+    "lat": 33.8028,
+    "lon": 76.473,
+    "aliases": [
+      "kargil"
+    ],
+    "is_online_resolved": true
+  },
+  "ziro": {
+    "name": "Ziro",
+    "district": "Ziro",
+    "state": "India",
+    "lat": 27.5387,
+    "lon": 93.8154,
+    "aliases": [
+      "ziro"
+    ],
+    "is_online_resolved": true
+  },
+  "dantewada": {
+    "name": "Dantewada",
+    "district": "Dantewada",
+    "state": "India",
+    "lat": 18.8641,
+    "lon": 81.3834,
+    "aliases": [
+      "dantewada"
+    ],
+    "is_online_resolved": true
+  },
+  "cherrapunji": {
+    "name": "Cherrapunji",
+    "district": "Cherrapunji",
+    "state": "India",
+    "lat": 25.2777,
+    "lon": 91.7292,
+    "aliases": [
+      "cherrapunji"
+    ],
+    "is_online_resolved": true
+  },
+  "baramulla": {
+    "name": "Baramulla",
+    "district": "Baramulla",
+    "state": "India",
+    "lat": 34.2087,
+    "lon": 74.3435,
+    "aliases": [
+      "baramulla"
+    ],
+    "is_online_resolved": true
+  },
+  "rameswaram": {
+    "name": "Rameswaram",
+    "district": "Rameswaram",
+    "state": "India",
+    "lat": 9.2845,
+    "lon": 79.3126,
+    "aliases": [
+      "rameswaram"
+    ],
+    "is_online_resolved": true
+  }
+}

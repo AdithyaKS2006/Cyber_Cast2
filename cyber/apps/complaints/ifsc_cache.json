@@ -11,5 +11,18 @@
     "address": "18TH JUNE ROADNEAR MATHAIS PLAZAPANJIMGOA403 001",
     "lat": 15.4909,
     "lon": 73.8278
+  },
+  "SBIN0005844": {
+    "is_valid": true,
+    "ifsc": "SBIN0005844",
+    "bank_code": "SBIN",
+    "bank_name": "State Bank of India",
+    "branch": "TAWANG",
+    "city": "TAWANG",
+    "district": "TAWANG",
+    "state": "ARUNACHAL PRADESH",
+    "address": "DIST TAWANG,ARUNACHAL PRADESH 790104",
+    "lat": 27.5879,
+    "lon": 91.8637
   }
 }

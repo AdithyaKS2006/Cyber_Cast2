@@ -1,0 +1,34 @@
+[
+  {
+    "atm_id": "ATM-DAN-001",
+    "bank": "State Bank of India",
+    "address": "Main Bazaar Road, Dantewada, India",
+    "lat": 18.8671,
+    "lon": 81.3854,
+    "source": "Synthesized Regional Spatial Grid"
+  },
+  {
+    "atm_id": "ATM-DAN-002",
+    "bank": "HDFC Bank",
+    "address": "Station Road Commercial Hub, Dantewada, India",
+    "lat": 18.8601,
+    "lon": 81.3799,
+    "source": "Synthesized Regional Spatial Grid"
+  },
+  {
+    "atm_id": "ATM-DAN-003",
+    "bank": "Canara Bank",
+    "address": "Civil Lines Compound, Dantewada, India",
+    "lat": 18.8696,
+    "lon": 81.3804,
+    "source": "Synthesized Regional Spatial Grid"
+  },
+  {
+    "atm_id": "ATM-DAN-004",
+    "bank": "Bank of Baroda",
+    "address": "GT Road Cross, Dantewada, India",
+    "lat": 18.8616,
+    "lon": 81.3884,
+    "source": "Synthesized Regional Spatial Grid"
+  }
+]
