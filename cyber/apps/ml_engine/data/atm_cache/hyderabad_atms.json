@@ -1,0 +1,50 @@
+[
+  {
+    "atm_id": "ATM-HYD-001",
+    "bank": "Axis Bank ATM",
+    "address": "Commercial Road, Hyderabad, Telangana",
+    "lat": 17.3991,
+    "lon": 78.4808,
+    "source": "OpenStreetMap"
+  },
+  {
+    "atm_id": "ATM-HYD-002",
+    "bank": "SBI ATM (2 Nos)",
+    "address": "Commercial Road, Hyderabad, Telangana",
+    "lat": 17.3977,
+    "lon": 78.4834,
+    "source": "OpenStreetMap"
+  },
+  {
+    "atm_id": "ATM-HYD-003",
+    "bank": "State Bank of India",
+    "address": "Commercial Road, Hyderabad, Telangana",
+    "lat": 17.3785,
+    "lon": 78.4844,
+    "source": "OpenStreetMap"
+  },
+  {
+    "atm_id": "ATM-HYD-004",
+    "bank": "State Bank",
+    "address": "Commercial Road, Hyderabad, Telangana",
+    "lat": 17.3846,
+    "lon": 78.4889,
+    "source": "OpenStreetMap"
+  },
+  {
+    "atm_id": "ATM-HYD-005",
+    "bank": "State Bank",
+    "address": "Commercial Road, Hyderabad, Telangana",
+    "lat": 17.3851,
+    "lon": 78.4881,
+    "source": "OpenStreetMap"
+  },
+  {
+    "atm_id": "ATM-HYD-006",
+    "bank": "State Bank of India",
+    "address": "Commercial Road, Hyderabad, Telangana",
+    "lat": 17.3764,
+    "lon": 78.492,
+    "source": "OpenStreetMap"
+  }
+]
