@@ -69,23 +69,33 @@ class Complaint(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.complaint_number:
+            import re
             from django.db import transaction
             year = datetime.datetime.now().year
             
             with transaction.atomic():
-                last_complaint = Complaint.objects.select_for_update().filter(
-                    complaint_number__startswith=f'CC-{year}-'
-                ).order_by('-complaint_number').first()
+                candidates = Complaint.objects.select_for_update().filter(
+                    complaint_number__regex=rf'^CC-{year}-\d+$'
+                ).values_list('complaint_number', flat=True)
                 
-                if last_complaint and last_complaint.complaint_number:
-                    try:
-                        last_num = int(last_complaint.complaint_number.split('-')[-1])
-                        new_num = last_num + 1
-                    except ValueError:
-                        new_num = 1
-                else:
-                    new_num = 1
-                self.complaint_number = f'CC-{year}-{new_num:05d}'
+                max_num = 0
+                for c_no in candidates:
+                    match = re.search(rf'^CC-{year}-(\d+)$', c_no)
+                    if match:
+                        try:
+                            val = int(match.group(1))
+                            if val > max_num:
+                                max_num = val
+                        except ValueError:
+                            pass
+                
+                new_num = max_num + 1
+                new_c_no = f'CC-{year}-{new_num:05d}'
+                while Complaint.objects.filter(complaint_number=new_c_no).exists():
+                    new_num += 1
+                    new_c_no = f'CC-{year}-{new_num:05d}'
+
+                self.complaint_number = new_c_no
                 super().save(*args, **kwargs)
         else:
             super().save(*args, **kwargs)
