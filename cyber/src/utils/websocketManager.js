@@ -21,6 +21,15 @@ class WebSocketConnection {
   connect() {
     if (this.ws?.readyState === WebSocket.OPEN) return;
 
+    // On static hosting (like GitHub Pages) without an explicit VITE_WS_HOST, do not attempt to open WebSockets to static host
+    const isStaticHost = typeof window !== 'undefined' && 
+      (window.location.hostname.includes('github.io') || window.location.hostname.includes('pages.dev'));
+    if (isStaticHost && !import.meta.env.VITE_WS_HOST) {
+      this.handlers.onConnect?.();
+      this._dispatchStatus('connected');
+      return;
+    }
+
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
     const host = import.meta.env.VITE_WS_HOST || window.location.host;
     let url = `${protocol}//${host}${this.path}`;

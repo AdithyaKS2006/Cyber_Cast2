@@ -100,6 +100,12 @@ const TriageSidebar = ({ isOpen, onClose, onOpen, navigate }) => {
 
   // WebSocket connection for real-time prediction alerts
   useEffect(() => {
+    const isStaticHost = typeof window !== 'undefined' && 
+      (window.location.hostname.includes('github.io') || window.location.hostname.includes('pages.dev'));
+    if (isStaticHost && !import.meta.env.VITE_WS_HOST) {
+      return;
+    }
+
     const match = document.cookie.match(new RegExp('(^| )ws_token=([^;]+)')) || document.cookie.match(new RegExp('(^| )access_token=([^;]+)'));
     const token = match ? match[2] : (localStorage.getItem('access_token') || '');
     const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';

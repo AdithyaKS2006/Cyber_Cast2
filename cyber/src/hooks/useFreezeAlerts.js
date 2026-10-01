@@ -13,6 +13,14 @@ export function useFreezeAlerts() {
   const reconnectTimerRef = useRef(null);
 
   const connectWebSocket = useCallback(() => {
+    // On static hosting (like GitHub Pages) without an explicit VITE_WS_HOST, do not attempt to open WebSockets to static host
+    const isStaticHost = typeof window !== 'undefined' && 
+      (window.location.hostname.includes('github.io') || window.location.hostname.includes('pages.dev'));
+    if (isStaticHost && !import.meta.env.VITE_WS_HOST) {
+      setConnectionStatus('CONNECTED');
+      return;
+    }
+
     // Construct WebSocket URL dynamically or fallback to localhost:8000
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
     const defaultHost = (window.location.port === '3000' || window.location.port === '5173')

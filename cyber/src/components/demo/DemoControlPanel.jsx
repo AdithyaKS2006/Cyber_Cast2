@@ -11,8 +11,14 @@ import {
   ChevronDown, 
   ChevronUp, 
   Zap,
-  Sparkles
+  Sparkles,
+  Play,
+  AlertCircle,
+  X,
+  ExternalLink,
+  Clock
 } from 'lucide-react';
+import apiClient from '../../utils/apiClient';
 
 const DemoControlPanel = () => {
   const [isDemoModeEnabled, setIsDemoModeEnabled] = useState(false);
@@ -37,7 +43,7 @@ const DemoControlPanel = () => {
 
     if (hasDemoParam) {
       // Fetch backend settings config
-      fetch('/api/v2/system/config/')
+      apiClient('/api/v2/system/config/')
         .then((res) => res.json())
         .then((data) => {
           if (data && data.demo_mode) {

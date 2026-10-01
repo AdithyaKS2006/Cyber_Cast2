@@ -304,8 +304,14 @@ const AlertCenter = ({ navigate }) => {
 
   /* ─ WebSocket live updates ─ */
   useEffect(() => {
+    const isStaticHost = typeof window !== 'undefined' && 
+      (window.location.hostname.includes('github.io') || window.location.hostname.includes('pages.dev'));
+    if (isStaticHost && !import.meta.env.VITE_WS_HOST) {
+      return;
+    }
+
     const proto = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const host  = window.location.host;
+    const host  = import.meta.env.VITE_WS_HOST || window.location.host;
     const wsUrl = `${proto}//${host}/ws/alerts/`;
 
     let ws;

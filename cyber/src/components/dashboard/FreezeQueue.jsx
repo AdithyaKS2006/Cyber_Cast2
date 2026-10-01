@@ -13,6 +13,7 @@ import {
   WifiOff
 } from 'lucide-react';
 import { useFreezeAlerts } from '../../hooks/useFreezeAlerts';
+import apiClient from '../../utils/apiClient';
 
 const FreezeQueue = () => {
   const [queue, setQueue] = useState([]);
@@ -26,12 +27,13 @@ const FreezeQueue = () => {
 
   const fetchQueue = async () => {
     try {
-      const response = await fetch('/api/v2/freeze/queue/');
+      const response = await apiClient('/api/v2/freeze/queue/');
       if (!response.ok) {
         throw new Error(`HTTP error ${response.status}`);
       }
-      const data = await response.json();
-      setQueue(data);
+      const rawData = await response.json();
+      const list = Array.isArray(rawData) ? rawData : (rawData?.results || []);
+      setQueue(list);
       setError(null);
     } catch (err) {
       console.error('Failed to fetch freeze queue:', err);
@@ -74,11 +76,8 @@ const FreezeQueue = () => {
   const handleManualPing = async (freezeId) => {
     setPingingId(freezeId);
     try {
-      const response = await fetch(`/api/v2/freeze/${freezeId}/manual-ping/`, {
+      const response = await apiClient(`/api/v2/freeze/${freezeId}/manual-ping/`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
       });
       if (response.ok) {
         setPingSuccess(prev => ({ ...prev, [freezeId]: true }));
