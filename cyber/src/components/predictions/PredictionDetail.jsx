@@ -17,26 +17,34 @@ import useTheme from '../../hooks/useTheme';
 const probColor = (p) =>
   p >= 0.15 ? '#ef4444' : p >= 0.12 ? '#f97316' : '#eab308';
 
-const OutcomeBadge = ({ outcome }) => {
-  const map = {
+const OutcomeBadge = ({ outcome, isLight }) => {
+  const mapDark = {
     PENDING:     'bg-orange-900/30 text-orange-400 border-orange-500/30',
     INTERCEPTED: 'bg-green-900/30  text-green-400  border-green-500/30',
     MISSED:      'bg-red-900/30    text-red-400    border-red-500/30',
     FALSE_ALARM: 'bg-zinc-800/40   text-zinc-500   border-zinc-600/30',
     NEEDS_REVIEW:'bg-yellow-900/30 text-yellow-400 border-yellow-500/30',
   };
+  const mapLight = {
+    PENDING:     'bg-orange-100 text-orange-700 border-orange-300',
+    INTERCEPTED: 'bg-emerald-100 text-emerald-800 border-emerald-300',
+    MISSED:      'bg-rose-100 text-rose-700 border-rose-300',
+    FALSE_ALARM: 'bg-slate-100 text-slate-600 border-slate-300',
+    NEEDS_REVIEW:'bg-amber-100 text-amber-800 border-amber-300',
+  };
+  const map = isLight ? mapLight : mapDark;
   return (
-    <span className={`px-3 py-1 rounded-full text-[9px] font-black border uppercase ${map[outcome] || map.PENDING}`}>
+    <span className={`px-3 py-1 rounded-full text-[9px] font-black border uppercase shadow-sm ${map[outcome] || map.PENDING}`}>
       {outcome?.replace('_', ' ')}
     </span>
   );
 };
 
 /* ── SHAP horizontal bar chart ───────────────────────────────────────── */
-const ShapChart = ({ shap }) => {
+const ShapChart = ({ shap, isLight }) => {
   if (!shap || !Object.keys(shap).length) {
     return (
-      <div className="text-[10px] text-zinc-500 font-bold uppercase italic py-4">
+      <div className={`text-[10px] font-bold uppercase italic py-4 ${isLight ? 'text-slate-400' : 'text-zinc-500'}`}>
         Feature importance data unavailable for this prediction.
       </div>
     );
@@ -53,10 +61,14 @@ const ShapChart = ({ shap }) => {
         const color = val >= 0 ? '#f97316' : '#3b82f6';
         return (
           <div key={feat} className="flex items-center gap-3">
-            <span className="text-[9px] font-bold text-zinc-500 uppercase w-36 flex-shrink-0 truncate">
+            <span className={`text-[9px] font-bold uppercase w-36 flex-shrink-0 truncate ${
+              isLight ? 'text-slate-600' : 'text-zinc-500'
+            }`}>
               {feat.replace(/_/g, ' ')}
             </span>
-            <div className="flex-1 h-2 bg-zinc-800 rounded-full overflow-hidden">
+            <div className={`flex-1 h-2 rounded-full overflow-hidden ${
+              isLight ? 'bg-slate-200' : 'bg-zinc-800'
+            }`}>
               <div className="h-full rounded-full transition-all"
                    style={{ width: `${pct.toFixed(1)}%`, background: color }} />
             </div>
@@ -70,11 +82,15 @@ const ShapChart = ({ shap }) => {
       <div className="flex gap-4 pt-1">
         <div className="flex items-center gap-1.5">
           <div className="w-2.5 h-2.5 rounded-sm bg-orange-500" />
-          <span className="text-[8px] text-zinc-600 font-bold uppercase">Increases risk</span>
+          <span className={`text-[8px] font-bold uppercase ${isLight ? 'text-slate-600' : 'text-zinc-600'}`}>
+            Increases risk
+          </span>
         </div>
         <div className="flex items-center gap-1.5">
           <div className="w-2.5 h-2.5 rounded-sm bg-blue-500" />
-          <span className="text-[8px] text-zinc-600 font-bold uppercase">Decreases risk</span>
+          <span className={`text-[8px] font-bold uppercase ${isLight ? 'text-slate-600' : 'text-zinc-600'}`}>
+            Decreases risk
+          </span>
         </div>
       </div>
     </div>
@@ -82,20 +98,20 @@ const ShapChart = ({ shap }) => {
 };
 
 /* ── Gemini brief renderer (markdown-lite) ───────────────────────────── */
-const BriefRenderer = ({ text }) => {
+const BriefRenderer = ({ text, isLight }) => {
   if (!text) return (
-    <p className="text-[10px] text-zinc-600 font-bold uppercase italic">
+    <p className={`text-[10px] font-bold uppercase italic ${isLight ? 'text-slate-400' : 'text-zinc-600'}`}>
       Brief not yet generated.
     </p>
   );
   const cleanText = text.replace(/\uFFFD/g, '');
   const parts = cleanText.split(/(\*\*[^*]+\*\*)/g);
   return (
-    <div className="space-y-3 text-[11px] leading-relaxed text-zinc-300">
+    <div className={`space-y-3 text-[11px] leading-relaxed ${isLight ? 'text-slate-700' : 'text-zinc-300'}`}>
       {parts.map((part, i) => {
         if (part.startsWith('**') && part.endsWith('**')) {
           return (
-            <p key={i} className="text-[10px] font-black text-orange-400 uppercase tracking-widest mt-4 first:mt-0">
+            <p key={i} className="text-[10px] font-black text-orange-500 uppercase tracking-widest mt-4 first:mt-0">
               {part.replace(/\*\*/g, '')}
             </p>
           );
@@ -106,7 +122,7 @@ const BriefRenderer = ({ text }) => {
             return (
               <div key={`${i}-${j}`} className="flex gap-2">
                 <span className="text-orange-500 flex-shrink-0">•</span>
-                <span>{line.replace(/^[•\-]\s*/, '')}</span>
+                <span className={isLight ? 'text-slate-700' : 'text-zinc-300'}>{line.replace(/^[•\-]\s*/, '')}</span>
               </div>
             );
           }
@@ -118,26 +134,27 @@ const BriefRenderer = ({ text }) => {
 };
 
 /* ── Outcome action modal ────────────────────────────────────────────── */
-const OutcomeModal = ({ current, onClose, onConfirm }) => {
+const OutcomeModal = ({ current, onClose, onConfirm, isLight }) => {
   const options = [
-    { value: 'INTERCEPTED', label: 'Intercepted ✓', color: '#22c55e' },
-    { value: 'MISSED',      label: 'Missed',        color: '#ef4444' },
-    { value: 'FALSE_ALARM', label: 'False Alarm',   color: '#71717a' },
+    { value: 'INTERCEPTED', label: 'Intercepted ✓', color: '#16a34a' },
+    { value: 'MISSED',      label: 'Missed',        color: '#dc2626' },
+    { value: 'FALSE_ALARM', label: 'False Alarm',   color: '#64748b' },
   ].filter(o => o.value !== current);
 
   return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 backdrop-blur-sm">
-      <div className="w-80 rounded-2xl border border-orange-500/30 p-6 space-y-4"
-           style={{ background: 'rgba(0,0,0,0.97)' }}>
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm">
+      <div className={`w-80 rounded-2xl border p-6 space-y-4 shadow-2xl ${
+        isLight ? 'bg-white border-slate-200' : 'border-orange-500/30 bg-zinc-950'
+      }`}>
         <div className="flex justify-between items-center">
-          <h3 className="text-sm font-black text-white uppercase">Update Outcome</h3>
-          <button onClick={onClose}><X className="w-4 h-4 text-zinc-500 hover:text-white" /></button>
+          <h3 className={`text-sm font-black uppercase ${isLight ? 'text-slate-900' : 'text-white'}`}>Update Outcome</h3>
+          <button onClick={onClose}><X className={`w-4 h-4 ${isLight ? 'text-slate-400 hover:text-slate-700' : 'text-zinc-500 hover:text-white'}`} /></button>
         </div>
         <div className="space-y-2">
           {options.map(o => (
             <button key={o.value} onClick={() => onConfirm(o.value)}
               className="w-full py-3 rounded-xl text-[10px] font-black uppercase transition-all hover:opacity-90"
-              style={{ background: `${o.color}20`, border: `1px solid ${o.color}40`, color: o.color }}>
+              style={{ background: `${o.color}15`, border: `1px solid ${o.color}40`, color: o.color }}>
               {o.label}
             </button>
           ))}
@@ -148,23 +165,31 @@ const OutcomeModal = ({ current, onClose, onConfirm }) => {
 };
 
 /* ── Analyst Review Banner ───────────────────────────────────────────── */
-const AnalystReviewBanner = ({ onApprove, onReject, processing }) => (
-  <div className="rounded-2xl border border-yellow-500/40 p-5 flex flex-col md:flex-row items-center justify-between gap-4"
-       style={{ background: 'linear-gradient(90deg, rgba(234,179,8,0.1), rgba(0,0,0,0))' }}>
+const AnalystReviewBanner = ({ onApprove, onReject, processing, isLight }) => (
+  <div className={`rounded-2xl border p-5 flex flex-col md:flex-row items-center justify-between gap-4 transition-all ${
+    isLight
+      ? 'border-yellow-400/80 bg-gradient-to-r from-amber-50 to-white shadow-sm'
+      : 'border-yellow-500/40'
+  }`}
+  style={isLight ? {} : { background: 'linear-gradient(90deg, rgba(234,179,8,0.1), rgba(0,0,0,0))' }}>
     <div className="flex items-center gap-4">
-      <div className="p-3 bg-yellow-500/20 rounded-full border border-yellow-500/30">
-        <UserCheck className="w-6 h-6 text-yellow-400" />
+      <div className={`p-3 rounded-full border ${isLight ? 'bg-amber-100 border-amber-300' : 'bg-yellow-500/20 border-yellow-500/30'}`}>
+        <UserCheck className={`w-6 h-6 ${isLight ? 'text-amber-600' : 'text-yellow-400'}`} />
       </div>
       <div>
-        <h2 className="text-sm font-black text-yellow-400 uppercase tracking-widest">Analyst Review Queue</h2>
-        <p className="text-[10px] text-zinc-400 mt-1">This prediction's confidence is below the auto-dispatch threshold. Manual review required.</p>
+        <h2 className={`text-sm font-black uppercase tracking-widest ${isLight ? 'text-amber-800' : 'text-yellow-400'}`}>Analyst Review Queue</h2>
+        <p className={`text-[10px] mt-1 ${isLight ? 'text-slate-600' : 'text-zinc-400'}`}>This prediction's confidence is below the auto-dispatch threshold. Manual review required.</p>
       </div>
     </div>
     <div className="flex gap-3 w-full md:w-auto">
       <button 
         onClick={onReject} 
         disabled={processing}
-        className="flex-1 md:flex-none px-6 py-2 rounded-xl text-[10px] font-black uppercase border border-zinc-700 text-zinc-400 hover:text-white hover:bg-zinc-800 disabled:opacity-50 transition-colors">
+        className={`flex-1 md:flex-none px-6 py-2 rounded-xl text-[10px] font-black uppercase border disabled:opacity-50 transition-colors ${
+          isLight
+            ? 'border-slate-300 text-slate-700 hover:bg-slate-100'
+            : 'border-zinc-700 text-zinc-400 hover:text-white hover:bg-zinc-800'
+        }`}>
         Reject (False Alarm)
       </button>
       <button 
@@ -178,7 +203,7 @@ const AnalystReviewBanner = ({ onApprove, onReject, processing }) => (
 );
 
 /* ── Intelligence Dispatch Panel ─────────────────────────────────────── */
-const IntelligenceDispatch = ({ prediction, onDispatch, dispatching }) => {
+const IntelligenceDispatch = ({ prediction, onDispatch, dispatching, isLight }) => {
   const isNeedsReview = prediction.outcome === 'NEEDS_REVIEW';
   const pkg = prediction.intelligence_package;
   const [copiedId, setCopiedId] = useState(null);
@@ -195,76 +220,149 @@ const IntelligenceDispatch = ({ prediction, onDispatch, dispatching }) => {
   if (pkg) {
     // Render the active package
     return (
-      <div className="rounded-2xl border border-emerald-500/30 p-6 space-y-6 relative overflow-hidden"
-           style={{ background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(12px)' }}>
+      <div className={`rounded-2xl border p-6 space-y-6 relative overflow-hidden transition-all ${
+        isLight
+          ? 'bg-white border-emerald-300/80 shadow-sm'
+          : 'border-emerald-500/30'
+      }`}
+      style={{
+        background: isLight ? 'rgba(255, 255, 255, 0.98)' : 'rgba(0,0,0,0.8)',
+        backdropFilter: 'blur(12px)'
+      }}>
         
         {/* Ambient glow */}
-        <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/5 rounded-full blur-3xl pointer-events-none" />
+        <div className={`absolute top-0 right-0 w-64 h-64 rounded-full blur-3xl pointer-events-none ${
+          isLight ? 'bg-emerald-500/10' : 'bg-emerald-500/5'
+        }`} />
 
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 relative z-10">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-emerald-500/20 rounded-lg border border-emerald-500/30">
-              <Send className="w-5 h-5 text-emerald-400" />
+            <div className={`p-2 rounded-lg border ${
+              isLight ? 'bg-emerald-50 border-emerald-200' : 'bg-emerald-500/20 border-emerald-500/30'
+            }`}>
+              <Send className="w-5 h-5 text-emerald-500" />
             </div>
             <div>
-              <h2 className="text-[12px] font-black text-white uppercase tracking-widest">Intelligence Package</h2>
-              <p className="text-[10px] text-zinc-400">ID: {String(pkg.id || '').split('-')[0].toUpperCase()}</p>
+              <h2 className={`text-[12px] font-black uppercase tracking-widest ${
+                isLight ? 'text-slate-900' : 'text-white'
+              }`}>
+                Intelligence Package
+              </h2>
+              <p className={`text-[10px] ${isLight ? 'text-slate-500' : 'text-zinc-400'}`}>
+                ID: {String(pkg.id || '').split('-')[0].toUpperCase()}
+              </p>
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <span className="px-3 py-1 bg-amber-500/20 text-amber-300 border border-amber-500/40 rounded-full text-[9px] font-black uppercase tracking-wider">
+            <span className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-wider ${
+              isLight
+                ? 'bg-amber-100 text-amber-800 border border-amber-300'
+                : 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
+            }`}>
               ⚡ [SIMULATED DELIVERY]
             </span>
-            <span className="px-3 py-1 bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 rounded-full text-[9px] font-black uppercase shadow-[0_0_10px_rgba(16,185,129,0.2)]">
+            <span className={`px-3 py-1 rounded-full text-[9px] font-black uppercase ${
+              isLight
+                ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
+                : 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 shadow-[0_0_10px_rgba(16,185,129,0.2)]'
+            }`}>
               Active · {pkg.status}
             </span>
           </div>
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 relative z-10">
-          <div className="p-4 rounded-xl bg-zinc-900/60 border border-zinc-800 space-y-3 hover:border-orange-500/30 transition-colors">
-            <h3 className="text-[10px] text-zinc-500 font-bold uppercase border-b border-zinc-800 pb-2">Bank Alerts ({pkg.bank_alerts?.length || 0})</h3>
+          <div className={`p-4 rounded-xl border space-y-3 transition-colors ${
+            isLight
+              ? 'bg-slate-50 hover:bg-slate-100/70 border-slate-200 hover:border-orange-400'
+              : 'bg-zinc-900/60 border-zinc-800 hover:border-orange-500/30'
+          }`}>
+            <h3 className={`text-[10px] font-bold uppercase pb-2 border-b ${
+              isLight ? 'text-slate-500 border-slate-200' : 'text-zinc-500 border-zinc-800'
+            }`}>
+              Bank Alerts ({pkg.bank_alerts?.length || 0})
+            </h3>
             <div className="space-y-2">
               {pkg.bank_alerts?.map(a => (
-                <div key={a.id} className="flex justify-between items-center text-xs text-white">
-                  <span className="truncate pr-2">{a.target_institution}</span>
-                  <span className="text-orange-400 font-bold text-[9px] bg-orange-500/10 px-2 py-0.5 rounded">{a.status}</span>
+                <div key={a.id} className="flex justify-between items-center text-xs">
+                  <span className={`truncate pr-2 font-bold ${isLight ? 'text-slate-800' : 'text-white'}`}>
+                    {a.target_institution}
+                  </span>
+                  <span className="text-orange-500 font-bold text-[9px] bg-orange-500/10 px-2 py-0.5 rounded border border-orange-500/20">
+                    {a.status}
+                  </span>
                 </div>
               ))}
             </div>
           </div>
-          <div className="p-4 rounded-xl bg-zinc-900/60 border border-zinc-800 space-y-3 hover:border-blue-500/30 transition-colors">
-            <h3 className="text-[10px] text-zinc-500 font-bold uppercase border-b border-zinc-800 pb-2">ATM Alerts ({pkg.atm_alerts?.length || 0})</h3>
+          <div className={`p-4 rounded-xl border space-y-3 transition-colors ${
+            isLight
+              ? 'bg-slate-50 hover:bg-slate-100/70 border-slate-200 hover:border-blue-400'
+              : 'bg-zinc-900/60 border-zinc-800 hover:border-blue-500/30'
+          }`}>
+            <h3 className={`text-[10px] font-bold uppercase pb-2 border-b ${
+              isLight ? 'text-slate-500 border-slate-200' : 'text-zinc-500 border-zinc-800'
+            }`}>
+              ATM Alerts ({pkg.atm_alerts?.length || 0})
+            </h3>
             <div className="space-y-2">
               {pkg.atm_alerts?.map(a => (
-                <div key={a.id} className="flex justify-between items-center text-xs text-white">
-                  <span className="truncate pr-2">{a.target_network}</span>
-                  <span className="text-blue-400 font-bold text-[9px] bg-blue-500/10 px-2 py-0.5 rounded">{a.status}</span>
+                <div key={a.id} className="flex justify-between items-center text-xs">
+                  <span className={`truncate pr-2 font-bold ${isLight ? 'text-slate-800' : 'text-white'}`}>
+                    {a.target_network}
+                  </span>
+                  <span className="text-blue-500 font-bold text-[9px] bg-blue-500/10 px-2 py-0.5 rounded border border-blue-500/20">
+                    {a.status}
+                  </span>
                 </div>
               ))}
             </div>
           </div>
-          <div className="p-4 rounded-xl bg-zinc-900/60 border border-zinc-800 space-y-3 hover:border-emerald-500/30 transition-colors">
-            <h3 className="text-[10px] text-zinc-500 font-bold uppercase border-b border-zinc-800 pb-2">LEA Dispatches ({pkg.lea_dispatches?.length || 0})</h3>
+          <div className={`p-4 rounded-xl border space-y-3 transition-colors ${
+            isLight
+              ? 'bg-slate-50 hover:bg-slate-100/70 border-slate-200 hover:border-emerald-400'
+              : 'bg-zinc-900/60 border-zinc-800 hover:border-emerald-500/30'
+          }`}>
+            <h3 className={`text-[10px] font-bold uppercase pb-2 border-b ${
+              isLight ? 'text-slate-500 border-slate-200' : 'text-zinc-500 border-zinc-800'
+            }`}>
+              LEA Dispatches ({pkg.lea_dispatches?.length || 0})
+            </h3>
             <div className="space-y-2">
               {pkg.lea_dispatches?.map(a => (
-                <div key={a.id} className="flex justify-between items-center text-xs text-white">
-                  <span className="truncate pr-2">{a.target_officer_id || a.target_district || 'Nodal Officer'}</span>
-                  <span className="text-emerald-400 font-bold text-[9px] bg-emerald-500/10 px-2 py-0.5 rounded">{a.status}</span>
+                <div key={a.id} className="flex justify-between items-center text-xs">
+                  <span className={`truncate pr-2 font-bold ${isLight ? 'text-slate-800' : 'text-white'}`}>
+                    {a.target_officer_id || a.target_district || 'Nodal Officer'}
+                  </span>
+                  <span className="text-emerald-500 font-bold text-[9px] bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
+                    {a.status}
+                  </span>
                 </div>
               ))}
             </div>
           </div>
         </div>
 
-        <div className="mt-4 pt-4 border-t border-zinc-800 relative z-10">
-          <h3 className="text-[10px] text-zinc-500 font-black uppercase tracking-widest mb-3">Integration Payloads (I4C/NCRP Compliant)</h3>
-          <div className="max-h-56 overflow-y-auto bg-black/60 p-3 rounded-xl border border-zinc-800 font-mono text-[9px] text-emerald-500/80 space-y-4">
+        <div className={`mt-4 pt-4 border-t relative z-10 ${isLight ? 'border-slate-200' : 'border-zinc-800'}`}>
+          <h3 className={`text-[10px] font-black uppercase tracking-widest mb-3 ${
+            isLight ? 'text-slate-700' : 'text-zinc-500'
+          }`}>
+            Integration Payloads (I4C/NCRP Compliant)
+          </h3>
+          <div className={`max-h-56 overflow-y-auto p-3 rounded-xl border font-mono text-[9px] space-y-4 ${
+            isLight
+              ? 'bg-slate-950 border-slate-800 text-emerald-400 shadow-inner'
+              : 'bg-black/60 border-zinc-800 text-emerald-500/80'
+          }`}>
             {pkg.bank_alerts?.map(a => a.payload && (
-              <div key={a.id} className="relative group border border-zinc-800/60 rounded-xl p-2.5 bg-black/40">
-                <div className="flex flex-wrap justify-between items-center gap-2 mb-2 pb-1 border-b border-zinc-800/60">
+              <div key={a.id} className={`relative group border rounded-xl p-2.5 ${
+                isLight ? 'border-slate-800/80 bg-slate-950/60' : 'border-zinc-800/60 bg-black/40'
+              }`}>
+                <div className={`flex flex-wrap justify-between items-center gap-2 mb-2 pb-1 border-b ${
+                  isLight ? 'border-slate-800' : 'border-zinc-800/60'
+                }`}>
                   <div className="flex items-center gap-2">
-                    <span className="text-orange-400/90 font-bold"># BANK_{a.target_institution.toUpperCase()}_PAYLOAD</span>
+                    <span className="text-orange-400 font-bold"># BANK_{a.target_institution.toUpperCase()}_PAYLOAD</span>
                     {a.payload.iso20022_xml && (
                       <div className="flex items-center bg-zinc-900 rounded-lg p-0.5 border border-zinc-800 text-[8px]">
                         <button
@@ -294,7 +392,7 @@ const IntelligenceDispatch = ({ prediction, onDispatch, dispatching }) => {
                   </div>
                   <button
                     onClick={() => handleCopy(bankTab[a.id] === 'xml' ? a.payload.iso20022_xml : a.payload, a.id)}
-                    className="flex items-center gap-1 text-[8px] text-zinc-400 hover:text-white px-2 py-0.5 rounded bg-zinc-800/80"
+                    className="flex items-center gap-1 text-[8px] text-zinc-400 hover:text-white px-2 py-0.5 rounded bg-zinc-800/80 hover:bg-zinc-700"
                   >
                     {copiedId === a.id ? <><Check className="w-3 h-3 text-emerald-400" /> Copied</> : <><Copy className="w-3 h-3" /> Copy {bankTab[a.id] === 'xml' ? 'XML' : 'JSON'}</>}
                   </button>
@@ -310,38 +408,40 @@ const IntelligenceDispatch = ({ prediction, onDispatch, dispatching }) => {
             {pkg.atm_alerts?.map(a => a.payload && (
               <div key={a.id} className="relative group">
                 <div className="flex justify-between items-center mb-1">
-                  <span className="text-blue-400/80 font-bold"># ATM_{a.target_network.toUpperCase()}_PAYLOAD</span>
-                  <button onClick={() => handleCopy(a.payload, a.id)} className="flex items-center gap-1 text-[8px] text-zinc-400 hover:text-white px-2 py-0.5 rounded bg-zinc-800/80">
+                  <span className="text-blue-400/90 font-bold"># ATM_{a.target_network.toUpperCase()}_PAYLOAD</span>
+                  <button onClick={() => handleCopy(a.payload, a.id)} className="flex items-center gap-1 text-[8px] text-zinc-400 hover:text-white px-2 py-0.5 rounded bg-zinc-800/80 hover:bg-zinc-700">
                     {copiedId === a.id ? <><Check className="w-3 h-3 text-emerald-400" /> Copied</> : <><Copy className="w-3 h-3" /> Copy JSON</>}
                   </button>
                 </div>
-                <pre>{JSON.stringify(a.payload, null, 2)}</pre>
+                <pre className="overflow-x-auto text-[9px] leading-tight">{JSON.stringify(a.payload, null, 2)}</pre>
               </div>
             ))}
             {pkg.lea_dispatches?.map(a => a.payload && (
               <div key={a.id} className="relative group">
                 <div className="flex justify-between items-center mb-1">
-                  <span className="text-emerald-400/80 font-bold"># LEA_{(a.target_officer_id || a.target_district || 'OFFICER').toUpperCase()}_PAYLOAD</span>
-                  <button onClick={() => handleCopy(a.payload, a.id)} className="flex items-center gap-1 text-[8px] text-zinc-400 hover:text-white px-2 py-0.5 rounded bg-zinc-800/80">
+                  <span className="text-emerald-400/90 font-bold"># LEA_{(a.target_officer_id || a.target_district || 'OFFICER').toUpperCase()}_PAYLOAD</span>
+                  <button onClick={() => handleCopy(a.payload, a.id)} className="flex items-center gap-1 text-[8px] text-zinc-400 hover:text-white px-2 py-0.5 rounded bg-zinc-800/80 hover:bg-zinc-700">
                     {copiedId === a.id ? <><Check className="w-3 h-3 text-emerald-400" /> Copied</> : <><Copy className="w-3 h-3" /> Copy JSON</>}
                   </button>
                 </div>
-                <pre>{JSON.stringify(a.payload, null, 2)}</pre>
+                <pre className="overflow-x-auto text-[9px] leading-tight">{JSON.stringify(a.payload, null, 2)}</pre>
               </div>
             ))}
           </div>
         </div>
 
-        <div className="pt-6 border-t border-zinc-800 relative z-10">
-          <h3 className="text-[10px] text-zinc-500 font-black uppercase mb-4 tracking-widest flex items-center gap-2">
-            <Activity className="w-3 h-3" /> Audit Timeline
+        <div className={`pt-6 border-t relative z-10 ${isLight ? 'border-slate-200' : 'border-zinc-800'}`}>
+          <h3 className={`text-[10px] font-black uppercase mb-4 tracking-widest flex items-center gap-2 ${
+            isLight ? 'text-slate-700' : 'text-zinc-500'
+          }`}>
+            <Activity className="w-3 h-3 text-emerald-500" /> Audit Timeline
           </h3>
           <div className="space-y-0 pl-1">
             {pkg.audit_logs?.map((log, i) => (
               <div key={log.id} className="flex gap-4 relative pb-5">
                 {/* Vertical line connecting nodes */}
                 {i < pkg.audit_logs.length - 1 && (
-                  <div className="absolute left-[3px] top-2 bottom-[-10px] w-px bg-zinc-800" />
+                  <div className={`absolute left-[3px] top-2 bottom-[-10px] w-px ${isLight ? 'bg-slate-300' : 'bg-zinc-800'}`} />
                 )}
                 {/* Node */}
                 <div className="relative z-10 mt-1">
@@ -349,9 +449,17 @@ const IntelligenceDispatch = ({ prediction, onDispatch, dispatching }) => {
                 </div>
                 {/* Content */}
                 <div className="-mt-1">
-                  <p className="text-[9px] font-mono text-zinc-500">{new Date(log.timestamp).toLocaleTimeString()} · {new Date(log.timestamp).toLocaleDateString()}</p>
-                  <p className="text-[11px] font-black text-white uppercase mt-0.5 tracking-tight">{log.action.replace(/_/g, ' ')}</p>
-                  <p className="text-[10px] text-zinc-400 mt-1">{typeof log.details === 'object' && log.details !== null ? JSON.stringify(log.details) : String(log.details ?? '')}</p>
+                  <p className={`text-[9px] font-mono ${isLight ? 'text-slate-500' : 'text-zinc-500'}`}>
+                    {new Date(log.timestamp).toLocaleTimeString()} · {new Date(log.timestamp).toLocaleDateString()}
+                  </p>
+                  <p className={`text-[11px] font-black uppercase mt-0.5 tracking-tight ${
+                    isLight ? 'text-slate-900' : 'text-white'
+                  }`}>
+                    {log.action.replace(/_/g, ' ')}
+                  </p>
+                  <p className={`text-[10px] mt-1 ${isLight ? 'text-slate-600' : 'text-zinc-400'}`}>
+                    {typeof log.details === 'object' && log.details !== null ? JSON.stringify(log.details) : String(log.details ?? '')}
+                  </p>
                 </div>
               </div>
             ))}
@@ -363,13 +471,22 @@ const IntelligenceDispatch = ({ prediction, onDispatch, dispatching }) => {
 
   // Before Dispatch
   return (
-    <div className="rounded-2xl border border-zinc-800 p-6 space-y-6"
-         style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(12px)' }}>
+    <div className={`rounded-2xl border p-6 space-y-6 transition-all ${
+      isLight ? 'bg-white border-slate-200 shadow-sm' : 'border-zinc-800'
+    }`}
+    style={{
+      background: isLight ? 'rgba(255, 255, 255, 0.98)' : 'rgba(0,0,0,0.7)',
+      backdropFilter: 'blur(12px)'
+    }}>
       <div className="flex items-center gap-2">
-        <Send className="w-5 h-5 text-orange-400" />
-        <h2 className="text-[12px] font-black text-white uppercase tracking-widest">Intelligence Dispatch</h2>
+        <Send className="w-5 h-5 text-orange-500" />
+        <h2 className={`text-[12px] font-black uppercase tracking-widest ${
+          isLight ? 'text-slate-900' : 'text-white'
+        }`}>
+          Intelligence Dispatch
+        </h2>
       </div>
-      <p className="text-xs text-zinc-400">
+      <p className={`text-xs ${isLight ? 'text-slate-600' : 'text-zinc-400'}`}>
         Ready to broadcast threat intelligence package to transaction banks, ATM networks, and local nodal officers.
       </p>
       
@@ -378,7 +495,7 @@ const IntelligenceDispatch = ({ prediction, onDispatch, dispatching }) => {
         disabled={isNeedsReview || dispatching}
         className={`w-full py-4 rounded-xl text-[12px] font-black uppercase transition-all flex items-center justify-center gap-2 ${
           isNeedsReview 
-            ? 'bg-zinc-900 text-zinc-600 border border-zinc-800 cursor-not-allowed' 
+            ? (isLight ? 'bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed' : 'bg-zinc-900 text-zinc-600 border border-zinc-800 cursor-not-allowed')
             : 'bg-gradient-to-r from-orange-600 to-red-600 text-white hover:opacity-90 shadow-[0_0_20px_rgba(249,115,22,0.3)]'
         }`}
       >
@@ -642,7 +759,9 @@ const CandidateATMsPanel = ({ atms, isp, isLight }) => {
               <div className="flex items-start justify-between gap-2 mb-1.5">
                 <div className="flex items-center gap-2">
                   <span className={`px-2 py-0.5 rounded text-[8px] font-black uppercase ${
-                    isPrimary ? 'bg-emerald-500 text-black' : 'bg-zinc-800 text-zinc-300'
+                    isPrimary
+                      ? 'bg-emerald-500 text-black'
+                      : (isLight ? 'bg-slate-200 text-slate-700' : 'bg-zinc-800 text-zinc-300')
                   }`}>
                     {isPrimary ? 'PRIMARY TARGET' : `ALT #${idx + 1}`}
                   </span>
@@ -650,7 +769,7 @@ const CandidateATMsPanel = ({ atms, isp, isLight }) => {
                     {atm.bank}
                   </span>
                 </div>
-                <span className="text-[9px] font-mono text-zinc-400">
+                <span className={`text-[9px] font-mono ${isLight ? 'text-slate-500' : 'text-zinc-400'}`}>
                   {atm.atm_id}
                 </span>
               </div>
@@ -659,8 +778,10 @@ const CandidateATMsPanel = ({ atms, isp, isLight }) => {
                 {atm.address}
               </p>
 
-              <div className="flex items-center justify-between text-[9px] pt-2 border-t border-zinc-800/40">
-                <span className="font-mono text-zinc-500">
+              <div className={`flex items-center justify-between text-[9px] pt-2 border-t ${
+                isLight ? 'border-slate-200' : 'border-zinc-800/40'
+              }`}>
+                <span className={`font-mono ${isLight ? 'text-slate-500' : 'text-zinc-500'}`}>
                   {atm.lat}, {atm.lon}
                 </span>
                 {isp && isPrimary ? (
@@ -809,11 +930,13 @@ const PredictionDetail = ({ predictionId, navigate }) => {
       {/* Breadcrumb */}
       <div className="flex items-center gap-3">
         <button onClick={() => navigate('predictions')}
-          className="text-[10px] font-black text-zinc-600 hover:text-white uppercase transition-colors flex items-center gap-1">
+          className={`text-[10px] font-black uppercase transition-colors flex items-center gap-1 ${
+            isLight ? 'text-slate-600 hover:text-slate-900' : 'text-zinc-600 hover:text-white'
+          }`}>
           <ChevronLeft className="w-3.5 h-3.5" /> Predictions
         </button>
-        <span className="text-zinc-800">/</span>
-        <span className="text-[10px] font-black text-orange-400 uppercase">Intelligence Report</span>
+        <span className={isLight ? 'text-slate-300' : 'text-zinc-800'}>/</span>
+        <span className="text-[10px] font-black text-orange-500 uppercase">Intelligence Report</span>
       </div>
 
       {/* Analyst Review Queue Banner */}
@@ -822,25 +945,30 @@ const PredictionDetail = ({ predictionId, navigate }) => {
           processing={updating}
           onApprove={() => handleDispatch(true)}
           onReject={() => handleOutcomeUpdate('FALSE_ALARM')}
+          isLight={isLight}
         />
       )}
 
       {/* Title row */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-black text-white uppercase tracking-tight">
+          <h1 className={`text-2xl font-black uppercase tracking-tight ${
+            isLight ? 'text-slate-900' : 'text-white'
+          }`}>
             {typeof prediction.predicted_zone_name === 'object' && prediction.predicted_zone_name !== null ? (prediction.predicted_zone_name.name || JSON.stringify(prediction.predicted_zone_name)) : String(prediction.predicted_zone_name ?? '—')}
           </h1>
-          <p className="text-[10px] text-zinc-500 font-bold uppercase mt-1">
+          <p className={`text-[10px] font-bold uppercase mt-1 ${
+            isLight ? 'text-slate-500' : 'text-zinc-500'
+          }`}>
             Rank #{prediction.rank || 1} · {prediction.model_version || 'XGB-CrimeCast-v1'} · {complaint.complaint_number || ''}
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <OutcomeBadge outcome={prediction.outcome} />
+          <OutcomeBadge outcome={prediction.outcome} isLight={isLight} />
           {(prediction.outcome === 'PENDING' || prediction.outcome === 'NEEDS_REVIEW') && (
             <button onClick={() => setShowOutcome(true)} disabled={updating}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-[10px] font-black uppercase transition-all"
-              style={{ background: 'linear-gradient(135deg,#f97316,#ef4444)', color: 'black' }}>
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-[10px] font-black uppercase transition-all shadow-md"
+              style={{ background: 'linear-gradient(135deg,#f97316,#ef4444)', color: 'white' }}>
               {updating ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle className="w-3.5 h-3.5" />}
               Update Outcome
             </button>
@@ -857,7 +985,8 @@ const PredictionDetail = ({ predictionId, navigate }) => {
           <IntelligenceDispatch 
             prediction={prediction} 
             dispatching={updating} 
-            onDispatch={handleDispatch} 
+            onDispatch={handleDispatch}
+            isLight={isLight}
           />
 
           {/* ISP & Telecom Triangulation Panel */}
@@ -886,36 +1015,44 @@ const PredictionDetail = ({ predictionId, navigate }) => {
           )}
 
           {/* Gemini Investigation Brief */}
-          <div className="rounded-2xl border border-orange-500/20 p-6 space-y-4"
-               style={{ background: 'rgba(249,115,22,0.03)', backdropFilter: 'blur(12px)' }}>
+          <div className={`rounded-2xl border p-6 space-y-4 transition-all ${
+            isLight ? 'bg-white border-orange-200/80 shadow-sm' : 'border-orange-500/20'
+          }`}
+          style={{ background: isLight ? '#ffffff' : 'rgba(249,115,22,0.03)', backdropFilter: 'blur(12px)' }}>
             <div className="flex items-center gap-2">
-              <Shield className="w-4 h-4 text-orange-400" />
-              <h2 className="text-[10px] font-black text-orange-400 uppercase tracking-widest">
+              <Shield className="w-4 h-4 text-orange-500" />
+              <h2 className="text-[10px] font-black text-orange-500 uppercase tracking-widest">
                 AI Investigation Brief
               </h2>
               <button
                 onClick={handleRegenerateBrief}
                 disabled={briefLoading}
-                className="ml-auto flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[8px] font-black uppercase transition-all hover:opacity-90 disabled:opacity-50"
-                style={{ background: 'rgba(249,115,22,0.12)', border: '1px solid rgba(249,115,22,0.25)', color: '#f97316' }}>
+                className={`ml-auto flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[8px] font-black uppercase transition-all hover:opacity-90 disabled:opacity-50 ${
+                  isLight
+                    ? 'bg-orange-50 hover:bg-orange-100 border border-orange-200 text-orange-700'
+                    : ''
+                }`}
+                style={isLight ? {} : { background: 'rgba(249,115,22,0.12)', border: '1px solid rgba(249,115,22,0.25)', color: '#f97316' }}>
                 {briefLoading
                   ? <><Loader2 className="w-3 h-3 animate-spin" /> Generating…</>
                   : <><Zap className="w-3 h-3" /> Regenerate Brief</>}
               </button>
             </div>
-            <BriefRenderer text={prediction.gemini_brief} />
+            <BriefRenderer text={prediction.gemini_brief} isLight={isLight} />
           </div>
 
           {/* SHAP Feature Importance */}
-          <div className="rounded-2xl border border-zinc-800/60 p-6 space-y-4"
-               style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(12px)' }}>
+          <div className={`rounded-2xl border p-6 space-y-4 transition-all ${
+            isLight ? 'bg-white border-slate-200 shadow-sm' : 'border-zinc-800/60'
+          }`}
+          style={{ background: isLight ? '#ffffff' : 'rgba(0,0,0,0.7)', backdropFilter: 'blur(12px)' }}>
             <div className="flex items-center gap-2">
-              <TrendingUp className="w-4 h-4 text-zinc-500" />
-              <h2 className="text-[10px] font-black text-orange-400 uppercase tracking-widest">
+              <TrendingUp className={`w-4 h-4 ${isLight ? 'text-slate-400' : 'text-zinc-500'}`} />
+              <h2 className="text-[10px] font-black text-orange-500 uppercase tracking-widest">
                 Feature Importance (SHAP)
               </h2>
             </div>
-            <ShapChart shap={prediction.feature_importance_json} />
+            <ShapChart shap={prediction.feature_importance_json} isLight={isLight} />
           </div>
         </div>
 
@@ -923,13 +1060,21 @@ const PredictionDetail = ({ predictionId, navigate }) => {
         <div className="space-y-5">
 
           {/* Probability card */}
-          <div className="rounded-2xl border p-5 space-y-3 text-center"
-               style={{ borderColor: `${color}40`, background: `${color}08` }}>
-            <p className="text-[9px] font-black text-zinc-600 uppercase tracking-widest">Probability</p>
+          <div className={`rounded-2xl border p-5 space-y-3 text-center transition-all ${
+            isLight ? 'bg-white border-slate-200 shadow-sm' : ''
+          }`}
+          style={{ borderColor: isLight ? undefined : `${color}40`, background: isLight ? '#ffffff' : `${color}08` }}>
+            <p className={`text-[9px] font-black uppercase tracking-widest ${
+              isLight ? 'text-slate-500' : 'text-zinc-600'
+            }`}>
+              Probability
+            </p>
             <p className="text-6xl font-black" style={{ color }}>
               {(Number(prediction.probability || 0) * 100).toFixed(0)}%
             </p>
-            <div className="h-2 rounded-full bg-zinc-800 overflow-hidden">
+            <div className={`h-2 rounded-full overflow-hidden ${
+              isLight ? 'bg-slate-200' : 'bg-zinc-800'
+            }`}>
               <div className="h-full rounded-full"
                    style={{ width: `${(Number(prediction.probability || 0) * 100).toFixed(0)}%`,
                             background: `linear-gradient(90deg,${color},#ef4444)` }} />
@@ -977,9 +1122,11 @@ const PredictionDetail = ({ predictionId, navigate }) => {
           )}
 
           {/* Zone info */}
-          <div className="rounded-2xl border border-zinc-800/60 p-5 space-y-4"
-               style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(12px)' }}>
-            <h2 className="text-[10px] font-black text-orange-400 uppercase tracking-widest">Zone Details</h2>
+          <div className={`rounded-2xl border p-5 space-y-4 transition-all ${
+            isLight ? 'bg-white border-slate-200 shadow-sm' : 'border-zinc-800/60'
+          }`}
+          style={{ background: isLight ? '#ffffff' : 'rgba(0,0,0,0.7)', backdropFilter: 'blur(12px)' }}>
+            <h2 className="text-[10px] font-black text-orange-500 uppercase tracking-widest">Zone Details</h2>
             <div className="space-y-3">
               {[
                 { icon: MapPin,  label: 'Zone',   val: typeof prediction.predicted_zone_name === 'object' && prediction.predicted_zone_name !== null ? (prediction.predicted_zone_name.name || JSON.stringify(prediction.predicted_zone_name)) : String(prediction.predicted_zone_name ?? 'N/A') },
@@ -989,12 +1136,12 @@ const PredictionDetail = ({ predictionId, navigate }) => {
               ].map(({ icon: Icon, label, val }) => (
                 <div key={label} className="flex items-start gap-3">
                   <div className="w-6 h-6 rounded-lg flex items-center justify-center flex-shrink-0"
-                       style={{ background: 'rgba(249,115,22,0.10)' }}>
-                    <Icon className="w-3 h-3 text-orange-400" />
+                       style={{ background: isLight ? 'rgba(249,115,22,0.12)' : 'rgba(249,115,22,0.10)' }}>
+                    <Icon className="w-3 h-3 text-orange-500" />
                   </div>
                   <div>
-                    <p className="text-[8px] font-black text-zinc-600 uppercase">{label}</p>
-                    <p className="text-[11px] font-bold text-white">{val}</p>
+                    <p className={`text-[8px] font-black uppercase ${isLight ? 'text-slate-400' : 'text-zinc-600'}`}>{label}</p>
+                    <p className={`text-[11px] font-bold ${isLight ? 'text-slate-900' : 'text-white'}`}>{val}</p>
                   </div>
                 </div>
               ))}
@@ -1003,7 +1150,11 @@ const PredictionDetail = ({ predictionId, navigate }) => {
             {/* Mini static map link */}
             <a href={`https://www.google.com/maps?q=${prediction.predicted_lat},${prediction.predicted_lon}`}
                target="_blank" rel="noopener noreferrer"
-               className="block w-full py-2 rounded-xl text-[9px] font-black uppercase text-center border border-zinc-700 text-zinc-400 hover:text-white hover:border-orange-500/40 transition-colors">
+               className={`block w-full py-2 rounded-xl text-[9px] font-black uppercase text-center border transition-colors ${
+                 isLight
+                   ? 'border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 hover:text-slate-900 hover:border-orange-400'
+                   : 'border-zinc-700 text-zinc-400 hover:text-white hover:border-orange-500/40'
+               }`}>
               Open in Google Maps ↗
             </a>
           </div>
@@ -1011,7 +1162,11 @@ const PredictionDetail = ({ predictionId, navigate }) => {
           {/* Back to complaint */}
           {complaint.id && (
             <button onClick={() => navigate(`complaints/${complaint.id}`)}
-              className="w-full py-2.5 rounded-xl border border-zinc-800 text-[9px] font-black uppercase text-zinc-500 hover:text-white hover:border-orange-500/30 transition-colors">
+              className={`w-full py-2.5 rounded-xl border text-[9px] font-black uppercase transition-colors ${
+                isLight
+                  ? 'border-slate-200 bg-white hover:bg-slate-50 text-slate-600 hover:text-slate-900 hover:border-orange-400 shadow-sm'
+                  : 'border-zinc-800 text-zinc-500 hover:text-white hover:border-orange-500/30'
+              }`}>
               ← View Complaint
             </button>
           )}
@@ -1023,6 +1178,7 @@ const PredictionDetail = ({ predictionId, navigate }) => {
           current={prediction.outcome}
           onClose={() => setShowOutcome(false)}
           onConfirm={handleOutcomeUpdate}
+          isLight={isLight}
         />
       )}
     </div>
