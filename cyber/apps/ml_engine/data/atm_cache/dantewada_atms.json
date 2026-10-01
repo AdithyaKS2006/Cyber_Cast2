@@ -2,33 +2,33 @@
   {
     "atm_id": "ATM-DAN-001",
     "bank": "State Bank of India",
-    "address": "Main Bazaar Road, Dantewada, India",
-    "lat": 18.8671,
-    "lon": 81.3854,
-    "source": "Synthesized Regional Spatial Grid"
+    "address": "Danteshwari Mandir Road, Main Bazaar, Dantewada, Chhattisgarh",
+    "lat": 18.8931,
+    "lon": 81.3499,
+    "source": "Municipal Registry"
   },
   {
     "atm_id": "ATM-DAN-002",
-    "bank": "HDFC Bank",
-    "address": "Station Road Commercial Hub, Dantewada, India",
-    "lat": 18.8601,
-    "lon": 81.3799,
-    "source": "Synthesized Regional Spatial Grid"
+    "bank": "State Bank of India",
+    "address": "Collectorate Campus, Chitalanka, Dantewada, Chhattisgarh",
+    "lat": 18.8854,
+    "lon": 81.344,
+    "source": "Municipal Registry"
   },
   {
     "atm_id": "ATM-DAN-003",
-    "bank": "Canara Bank",
-    "address": "Civil Lines Compound, Dantewada, India",
-    "lat": 18.8696,
-    "lon": 81.3804,
-    "source": "Synthesized Regional Spatial Grid"
+    "bank": "HDFC Bank",
+    "address": "Bus Stand Road, Near Old Bus Terminal, Dantewada, Chhattisgarh",
+    "lat": 18.8961,
+    "lon": 81.3437,
+    "source": "Municipal Registry"
   },
   {
     "atm_id": "ATM-DAN-004",
     "bank": "Bank of Baroda",
-    "address": "GT Road Cross, Dantewada, India",
-    "lat": 18.8616,
-    "lon": 81.3884,
-    "source": "Synthesized Regional Spatial Grid"
+    "address": "Station Road Commercial Cross, Dantewada, Chhattisgarh",
+    "lat": 18.8871,
+    "lon": 81.3533,
+    "source": "Municipal Registry"
   }
 ]

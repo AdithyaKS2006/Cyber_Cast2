@@ -24,5 +24,18 @@
     "address": "DIST TAWANG,ARUNACHAL PRADESH 790104",
     "lat": 27.5879,
     "lon": 91.8637
+  },
+  "SBIN0000545": {
+    "is_valid": true,
+    "ifsc": "SBIN0000545",
+    "bank_code": "SBIN",
+    "bank_name": "State Bank of India",
+    "branch": "DANTEWADA",
+    "city": "DANTEWADA",
+    "district": "DANTEWARA",
+    "state": "CHANDIGARH",
+    "address": "DIST  DANTEWADA, CHHATTISGARH 494449",
+    "lat": 18.8641,
+    "lon": 81.3834
   }
 }

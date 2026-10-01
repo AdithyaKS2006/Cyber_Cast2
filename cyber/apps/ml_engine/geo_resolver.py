@@ -94,16 +94,24 @@ class GeoResolver:
         # 4. Fallback to OpenStreetMap Nominatim (timeout 2s)
         try:
             encoded = urllib.parse.quote(f"{clean_query}, India")
-            url = f"https://nominatim.openstreetmap.org/search?q={encoded}&format=json&countrycodes=in&limit=1&addressdetails=1"
+            url = f"https://nominatim.openstreetmap.org/search?q={encoded}&format=json&countrycodes=in&limit=5&addressdetails=1"
             req = urllib.request.Request(
                 url,
                 headers={"User-Agent": "CrimeCast-Predictive-Cyber-Intelligence/3.0"}
             )
-            with urllib.request.urlopen(req, timeout=2.5) as response:
+            with urllib.request.urlopen(req, timeout=3.0) as response:
                 if response.status == 200:
                     data = json.loads(response.read().decode('utf-8'))
                     if data and len(data) > 0:
+                        # Prioritize human settlements / urban centers (town, city, suburb) over empty forest/rural boundary polygons
                         top = data[0]
+                        for item in data:
+                            c = item.get('class')
+                            t = item.get('type')
+                            if c == 'place' or t in {'city', 'town', 'suburb', 'neighbourhood', 'village'}:
+                                top = item
+                                break
+
                         addr = top.get('address', {})
                         detected_state = addr.get('state') or addr.get('state_district') or "India"
                         detected_district = addr.get('state_district') or addr.get('county') or clean_query.title()

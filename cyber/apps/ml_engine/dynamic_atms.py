@@ -161,6 +161,12 @@ def _generate_regional_atms(lat: float, lon: float, district_name: str, state_na
             ("HDFC Bank", "Luis Miranda Road, Margao, Goa"),
             ("Bank of Baroda", "Pajifond, Near Municipal Council, Margao, Goa"),
             ("Canara Bank", "Abade Faria Road, Margao, Goa"),
+        ],
+        "dantewada": [
+            ("State Bank of India", "Danteshwari Mandir Road, Main Bazaar, Dantewada"),
+            ("State Bank of India", "Collectorate Campus, Chitalanka, Dantewada"),
+            ("HDFC Bank", "Bus Stand Road, Near Old Bus Terminal, Dantewada"),
+            ("Bank of Baroda", "Station Road Commercial Cross, Dantewada"),
         ]
     }
 
