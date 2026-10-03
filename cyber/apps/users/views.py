@@ -111,14 +111,16 @@ class CustomTokenObtainPairView(TokenObtainPairView):
             refresh_token = response.data.get('refresh')
             access_lifetime = int(settings.SIMPLE_JWT.get('ACCESS_TOKEN_LIFETIME', timedelta(hours=2)).total_seconds())
             refresh_lifetime = int(settings.SIMPLE_JWT.get('REFRESH_TOKEN_LIFETIME', timedelta(days=7)).total_seconds())
+            cookie_samesite = getattr(settings, 'JWT_COOKIE_SAMESITE', 'Lax')
+            cookie_secure = getattr(settings, 'JWT_COOKIE_SECURE', not settings.DEBUG)
             if access_token:
                 response.set_cookie(
                     'access_token',
                     access_token,
                     max_age=access_lifetime,
                     httponly=True,
-                    secure=not settings.DEBUG,
-                    samesite='Strict',
+                    secure=cookie_secure,
+                    samesite=cookie_samesite,
                     path='/',
                 )
                 response.set_cookie(
@@ -126,8 +128,8 @@ class CustomTokenObtainPairView(TokenObtainPairView):
                     access_token,
                     max_age=access_lifetime,
                     httponly=False,
-                    secure=not settings.DEBUG,
-                    samesite='Strict',
+                    secure=cookie_secure,
+                    samesite=cookie_samesite,
                     path='/',
                 )
             if refresh_token:
@@ -136,8 +138,8 @@ class CustomTokenObtainPairView(TokenObtainPairView):
                     refresh_token,
                     max_age=refresh_lifetime,
                     httponly=True,
-                    secure=not settings.DEBUG,
-                    samesite='Strict',
+                    secure=cookie_secure,
+                    samesite=cookie_samesite,
                     path='/api/v1/auth/refresh/',
                 )
                 
@@ -178,14 +180,16 @@ class CustomTokenRefreshView(TokenRefreshView):
         access_lifetime = int(settings.SIMPLE_JWT.get('ACCESS_TOKEN_LIFETIME', timedelta(hours=2)).total_seconds())
         refresh_lifetime = int(settings.SIMPLE_JWT.get('REFRESH_TOKEN_LIFETIME', timedelta(days=7)).total_seconds())
 
+        cookie_samesite = getattr(settings, 'JWT_COOKIE_SAMESITE', 'Lax')
+        cookie_secure = getattr(settings, 'JWT_COOKIE_SECURE', not settings.DEBUG)
         if access_token:
             response.set_cookie(
                 'access_token',
                 access_token,
                 max_age=access_lifetime,
                 httponly=True,
-                secure=not settings.DEBUG,
-                samesite='Strict',
+                secure=cookie_secure,
+                samesite=cookie_samesite,
                 path='/',
             )
             response.set_cookie(
@@ -193,8 +197,8 @@ class CustomTokenRefreshView(TokenRefreshView):
                 access_token,
                 max_age=access_lifetime,
                 httponly=False,
-                secure=not settings.DEBUG,
-                samesite='Strict',
+                secure=cookie_secure,
+                samesite=cookie_samesite,
                 path='/',
             )
         if refresh_token:
@@ -203,8 +207,8 @@ class CustomTokenRefreshView(TokenRefreshView):
                 refresh_token,
                 max_age=refresh_lifetime,
                 httponly=True,
-                secure=not settings.DEBUG,
-                samesite='Strict',
+                secure=cookie_secure,
+                samesite=cookie_samesite,
                 path='/api/v1/auth/refresh/',
             )
         return response
@@ -275,12 +279,14 @@ class RegisterView(generics.CreateAPIView):
         }, status=status.HTTP_201_CREATED)
         access_token = str(refresh.access_token)
         refresh_token = str(refresh)
+        cookie_samesite = getattr(settings, 'JWT_COOKIE_SAMESITE', 'Lax')
+        cookie_secure = getattr(settings, 'JWT_COOKIE_SECURE', not settings.DEBUG)
         response.set_cookie('access_token', access_token, max_age=15 * 60, httponly=True,
-                            secure=not settings.DEBUG, samesite='Strict', path='/')
+                            secure=cookie_secure, samesite=cookie_samesite, path='/')
         response.set_cookie('ws_token', access_token, max_age=15 * 60, httponly=False,
-                            secure=not settings.DEBUG, samesite='Strict', path='/')
+                            secure=cookie_secure, samesite=cookie_samesite, path='/')
         response.set_cookie('refresh_token', refresh_token, max_age=7 * 24 * 60 * 60, httponly=True,
-                            secure=not settings.DEBUG, samesite='Strict', path='/api/v1/auth/refresh/')
+                            secure=cookie_secure, samesite=cookie_samesite, path='/api/v1/auth/refresh/')
         return response
 
 
