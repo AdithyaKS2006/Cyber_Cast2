@@ -25,8 +25,9 @@ services:
         value: "True"
 
   # CrimeCast Frontend Web Interface
-  - type: static
+  - type: web
     name: cybercast-frontend
+    runtime: static
     rootDir: cyber
     buildCommand: "npm install && npm run build"
     staticPublishPath: dist
