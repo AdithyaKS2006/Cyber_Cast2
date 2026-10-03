@@ -40,7 +40,5 @@ services:
       - key: VITE_BASE_PATH
         value: "/"
       - key: VITE_API_URL
-        fromService:
-          type: web
-          name: cybercast-backend
-          property: url
+        sync: false
+        value: "https://cybercast-backend.onrender.com"
