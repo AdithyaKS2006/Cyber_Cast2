@@ -28,7 +28,6 @@ services:
   - type: web
     name: cybercast-frontend
     runtime: static
-    plan: free
     rootDir: cyber
     buildCommand: "npm ci && npm run build"
     staticPublishPath: dist
