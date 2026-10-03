@@ -5,8 +5,8 @@ services:
     runtime: python
     plan: free
     rootDir: cyber
-    buildCommand: "pip install --upgrade pip && pip install -r requirements.txt && python manage.py migrate --run-syncdb -v 0 && python demo/seed_demo_data.py && python manage.py collectstatic --noinput"
-    startCommand: "daphne -b 0.0.0.0 -p $PORT crimecast.asgi:application"
+    buildCommand: "pip install --upgrade pip && pip install -r requirements.txt && python manage.py collectstatic --noinput"
+    startCommand: "python manage.py migrate --run-syncdb -v 0 && python demo/seed_demo_data.py && daphne -b 0.0.0.0 -p $PORT crimecast.asgi:application"
     healthCheckPath: /api/v1/health/
     envVars:
       - key: DEBUG
@@ -16,7 +16,7 @@ services:
       - key: SECRET_KEY
         generateValue: true
       - key: PYTHON_VERSION
-        value: "3.11.9"
+        value: "3.12.8"
       - key: JWT_COOKIE_SAMESITE
         value: "None"
       - key: JWT_COOKIE_SECURE
@@ -25,11 +25,10 @@ services:
         value: "True"
 
   # CrimeCast Frontend Web Interface
-  - type: web
+  - type: static
     name: cybercast-frontend
-    runtime: static
     rootDir: cyber
-    buildCommand: "npm ci && npm run build"
+    buildCommand: "npm install && npm run build"
     staticPublishPath: dist
     routes:
       - type: rewrite
