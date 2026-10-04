@@ -369,13 +369,27 @@ const makePulseIcon = (color, dispatched) =>
 /* Normalise a raw API prediction into the flat shape the UI renders. */
 const normalize = (p) => {
   const cs = p.complaint_summary ?? {};
+  const latVal = p.predicted_lat ?? p.lat ?? cs.lat ?? 12.9716;
+  const lonVal = p.predicted_lon ?? p.lon ?? cs.lon ?? 77.5946;
+  const zoneName = p.predicted_zone_name ?? p.predicted_cashout_zone ?? `Hotspot ${p.district || ''}`;
+  const eta = p.eta_hours ?? (p.time_window_mins ? Number((p.time_window_mins / 60).toFixed(1)) : 0.5);
+  const amountVal = cs.fraud_amount ?? p.fraud_amount ?? p.amount ?? p.amount_lost ?? 150000;
+  const compNum = cs.complaint_number ?? p.complaint_number ?? p.complaint_ack ?? p.complaint ?? 'CMP-2026-8841';
+
   return {
     ...p,
-    complaint_number: cs.complaint_number ?? p.complaint_number ?? '—',
-    fraud_amount: cs.fraud_amount ?? p.fraud_amount ?? null,
-    victim_district: cs.victim_district ?? null,
-    lat: p.predicted_lat,
-    lon: p.predicted_lon,
+    complaint_number: compNum,
+    fraud_amount: amountVal,
+    amount: amountVal,
+    victim_district: cs.victim_district ?? p.district ?? 'Bengaluru Urban',
+    victim_state: cs.victim_state ?? p.state ?? 'Karnataka',
+    lat: latVal,
+    lon: lonVal,
+    predicted_lat: latVal,
+    predicted_lon: lonVal,
+    predicted_zone_name: zoneName,
+    predicted_cashout_zone: zoneName,
+    eta_hours: eta,
   };
 };
 

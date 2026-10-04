@@ -128,7 +128,7 @@ export async function getLiveStats() {
 export async function getLivePredictions() {
   const complaints = await fetchLiveComplaints();
   const activeList = complaints.filter(c => c.status === 'PREDICTION_ACTIVE' || c.priority === 'CRITICAL').slice(0, 10);
-  if (!activeList.length) return MOCK_PREDICTIONS;
+  const sourceList = activeList.length ? activeList : MOCK_COMPLAINTS;
 
   const districtCoords = {
     'Bengaluru': { lat: 12.9716, lon: 77.5946 },
@@ -145,30 +145,76 @@ export async function getLivePredictions() {
     'Gurugram': { lat: 28.4595, lon: 77.0266 },
   };
 
-  return activeList.map((c, i) => {
+  return sourceList.map((c, i) => {
     const coords = districtCoords[c.district] || districtCoords[c.state] || { lat: 12.9716 + (i * 0.4), lon: 77.5946 + (i * 0.3) };
+    const amount = Number(c.amount_lost || c.fraud_amount || 485000);
+    const windowMins = c.golden_window_remaining_mins || (18 + (i * 8));
+    const eta = Number((windowMins / 60).toFixed(1));
+    const zone = `${c.district || 'City'} ATM & Micro-ATM Hotspot #${i + 1}`;
+    const prob = Number((0.88 - (i * 0.04)).toFixed(2));
+    const ack = c.acknowledgement_number || c.complaint_number || `NCRP-2026-IN-${98214 + i}`;
+
+    const sampleXml = `<?xml version="1.0" encoding="UTF-8"?>
+<Document xmlns="urn:iso:std:iso:20022:tech:xsd:pacs.008.001.08">
+  <FIToFICstmrCdtTrf>
+    <GrpHdr>
+      <MsgId>I4C-INTERCEPT-${Date.now()}-${i}</MsgId>
+      <CreDtTm>${new Date().toISOString()}</CreDtTm>
+      <NbOfTxs>1</NbOfTxs>
+      <SttlmInf><SttlmMtd>CLRG</SttlmMtd></SttlmInf>
+    </GrpHdr>
+    <CdtTrfTxInf>
+      <PmtId><EndToEndId>${ack}</EndToEndId></PmtId>
+      <IntrBkSttlmAmt Ccy="INR">${amount}</IntrBkSttlmAmt>
+      <Dbtr><Nm>${c.complainant_name || c.victim_name || 'Victim'}</Nm></Dbtr>
+      <Cdtr><Nm>${c.suspect_account || 'Mule Target'}</Nm></Cdtr>
+      <CdtrAgt><FinInstnId><BICFI>${c.suspect_bank || 'HDFC Bank'}</BICFI></FinInstnId></CdtrAgt>
+    </CdtTrfTxInf>
+  </FIToFICstmrCdtTrf>
+</Document>`;
+
     return {
       id: `PRED-2026-${String(i + 1).padStart(3, '0')}`,
-      complaint_ack: c.acknowledgement_number || c.id,
+      complaint_ack: ack,
+      acknowledgement_number: ack,
       complaint: c.id,
+      complaint_number: c.id,
       lat: coords.lat,
       lon: coords.lon,
+      predicted_lat: coords.lat,
+      predicted_lon: coords.lon,
       district: c.district,
       state: c.state,
-      risk_score: Number((0.85 + (i * 0.02) % 0.13).toFixed(2)),
-      probability: Number((0.85 + (i * 0.02) % 0.13).toFixed(2)),
+      victim_district: c.district,
+      victim_state: c.state,
+      risk_score: prob,
+      probability: prob,
       confidence: c.priority === 'CRITICAL' ? 'CRITICAL' : 'HIGH',
-      time_window_mins: c.golden_window_remaining_mins || (20 + (i * 5)),
-      predicted_cashout_zone: `${c.district} ATM & Micro-ATM Hub #${i + 1}`,
-      outcome: c.status === 'CLOSED' ? 'INTERCEPTED' : 'PENDING',
-      suspect_bank: c.suspect_bank,
-      amount: c.amount_lost,
-      mule_account: `${c.suspect_account.substring(0, 6)}... (${c.suspect_bank})`,
+      time_window_mins: windowMins,
+      eta_hours: eta,
+      predicted_cashout_zone: zone,
+      predicted_zone_name: zone,
+      outcome: c.status === 'CLOSED' || c.status === 'INTERCEPTED' ? 'INTERCEPTED' : (i % 3 === 0 ? 'NEEDS_REVIEW' : 'PENDING'),
+      status: 'SENT',
+      suspect_bank: c.suspect_bank || 'HDFC Bank',
+      amount: amount,
+      fraud_amount: amount,
+      amount_lost: amount,
+      mule_account: `${(c.suspect_account || '918237465012').substring(0, 6)}... (${c.suspect_bank || 'Bank'})`,
+      iso20022_xml: sampleXml,
+      iso20022_payload: sampleXml,
       top_features: [
         { name: 'Velocity of transfer', contribution: '+0.34' },
         { name: 'ATM night withdrawal pattern', contribution: '+0.28' },
         { name: 'New UPI device registration', contribution: '+0.21' },
       ],
+      complaint_summary: {
+        complaint_number: ack,
+        fraud_amount: amount,
+        victim_district: c.district,
+        victim_state: c.state,
+        category: c.category || 'UPI Fraud',
+      }
     };
   });
 }
@@ -437,45 +483,72 @@ export const MOCK_DASHBOARD_STATS = {
 export const MOCK_FREEZE_QUEUE = [
   {
     id: 'FRZ-2026-101',
+    freeze_id: 'FRZ-2026-101',
     complaint_id: 'CMP-2026-8841',
+    complaint_number: 'NCRP-2026-IN-98214',
     account_number: '••••••••5012',
+    target_account: '••••••••5012',
     account_holder: 'Aman Kumar (Mule #1)',
     bank_name: 'HDFC Bank',
-    branch: 'Koramangala, Bengaluru',
+    target_bank_name: 'HDFC Bank',
     ifsc: 'HDFC0000123',
+    target_bank_ifsc: 'HDFC0000123',
+    branch: 'Koramangala, Bengaluru',
     frozen_amount: 485000,
-    status: 'SENT_TO_NODAL',
+    freeze_amount: 485000,
+    status: 'PENDING',
     created_at: new Date(Date.now() - 12 * 60000).toISOString(),
+    requested_at: new Date(Date.now() - 12 * 60000).toISOString(),
+    window_expires_at: new Date(Date.now() + 18 * 60000).toISOString(),
     legal_section: 'Section 106 BNSS 2023',
     nodal_officer: 'nodal.hdfc@bank.i4c.gov.in',
+    i4c_freeze_id: 'I4C-FRZ-9921',
   },
   {
     id: 'FRZ-2026-102',
+    freeze_id: 'FRZ-2026-102',
     complaint_id: 'CMP-2026-8842',
+    complaint_number: 'NCRP-2026-IN-98215',
     account_number: '••••••••8511',
+    target_account: '••••••••8511',
     account_holder: 'Vikram Joshi (Mule #2)',
     bank_name: 'ICICI Bank',
-    branch: 'Andheri West, Mumbai',
+    target_bank_name: 'ICICI Bank',
     ifsc: 'ICIC0000456',
+    target_bank_ifsc: 'ICIC0000456',
+    branch: 'Andheri West, Mumbai',
     frozen_amount: 1850000,
-    status: 'FROZEN_CONFIRMED',
+    freeze_amount: 1850000,
+    status: 'FROZEN',
     created_at: new Date(Date.now() - 28 * 60000).toISOString(),
+    requested_at: new Date(Date.now() - 28 * 60000).toISOString(),
+    window_expires_at: new Date(Date.now() + 32 * 60000).toISOString(),
     legal_section: 'Section 106 BNSS 2023',
     nodal_officer: 'nodal.icici@bank.i4c.gov.in',
+    i4c_freeze_id: 'I4C-FRZ-9922',
   },
   {
     id: 'FRZ-2026-103',
+    freeze_id: 'FRZ-2026-103',
     complaint_id: 'CMP-2026-8843',
+    complaint_number: 'NCRP-2026-IN-98216',
     account_number: '••••••••8371',
+    target_account: '••••••••8371',
     account_holder: 'Deepak Enterprise (Shell Entity)',
     bank_name: 'State Bank of India',
-    branch: 'Parliament Street, New Delhi',
+    target_bank_name: 'State Bank of India',
     ifsc: 'SBIN0000789',
+    target_bank_ifsc: 'SBIN0000789',
+    branch: 'Parliament Street, New Delhi',
     frozen_amount: 3200000,
-    status: 'FROZEN_CONFIRMED',
+    freeze_amount: 3200000,
+    status: 'FROZEN',
     created_at: new Date(Date.now() - 45 * 60000).toISOString(),
+    requested_at: new Date(Date.now() - 45 * 60000).toISOString(),
+    window_expires_at: new Date(Date.now() + 5 * 60000).toISOString(),
     legal_section: 'Section 106 BNSS 2023',
     nodal_officer: 'nodal.sbi@bank.i4c.gov.in',
+    i4c_freeze_id: 'I4C-FRZ-9923',
   },
 ];
 
@@ -779,6 +852,144 @@ export async function handleMockRequest(endpoint, options = {}) {
 
   if (path.includes('/predictions/simulate-webhook')) {
     return jsonResponse({ success: true, message: 'Simulation dispatched' }, 200);
+  }
+
+  // LEA Dispatches Rollup
+  if (path.includes('/predictions/lea-dispatches/rollup')) {
+    return jsonResponse([
+      {
+        id: 'ROLLUP-JMT-01',
+        jurisdiction: 'Jamtara Cyber District',
+        target_district: 'Jamtara',
+        active_dispatches: 4,
+        total_intercepted_amount: 1450000,
+        risk_level: 'CRITICAL',
+        assigned_officers: ['Insp. Singh', 'Constable Kumar'],
+        hotspot_atms: ['ATM-JMT-001 (SBI)', 'ATM-JMT-002 (HDFC)'],
+      },
+      {
+        id: 'ROLLUP-NUH-02',
+        jurisdiction: 'Mewat / Nuh Cyber Cell',
+        target_district: 'Nuh',
+        active_dispatches: 2,
+        total_intercepted_amount: 890000,
+        risk_level: 'HIGH',
+        assigned_officers: ['DSP Sharma'],
+        hotspot_atms: ['ATM-NUH-004 (PNB)'],
+      }
+    ], 200);
+  }
+
+  // LEA Dispatches List
+  if (path.includes('/predictions/lea-dispatches')) {
+    const dispatches = [
+      {
+        id: "DISP-JMT-0091",
+        target_district: "Jamtara",
+        status: "SENT",
+        sent_at: new Date(Date.now() - 420000).toISOString(),
+        risk_level: "CRITICAL",
+        candidate_atms: [
+          { atm_id: "ATM-JMT-001", bank: "SBI", address: "Main Market Branch, Jamtara, Jharkhand", lat: 23.9620, lon: 86.8020 },
+          { atm_id: "ATM-JMT-002", bank: "HDFC Bank", address: "Station Road, Jamtara, Jharkhand", lat: 23.9590, lon: 86.7980 }
+        ],
+        package: {
+          package_id: "PKG-JMT-8812",
+          complaint: {
+            acknowledgement_no: "NCRP-2026-IN-98214",
+            fraud_amount: 485000,
+            victim_district: "Bengaluru Urban",
+            victim_state: "Karnataka",
+            fraud_method: "Phishing QR Code / Remote Access Screen Share"
+          }
+        }
+      },
+      {
+        id: "DISP-NUH-0042",
+        target_district: "Gurugram",
+        status: "ACKNOWLEDGED",
+        sent_at: new Date(Date.now() - 1800000).toISOString(),
+        risk_level: "HIGH",
+        candidate_atms: [
+          { atm_id: "ATM-GUR-011", bank: "ICICI Bank", address: "Cyber Hub Ground Floor, Gurugram", lat: 28.4595, lon: 77.0266 }
+        ],
+        package: {
+          package_id: "PKG-GUR-9012",
+          complaint: {
+            acknowledgement_no: "NCRP-2026-IN-98218",
+            fraud_amount: 85000,
+            victim_district: "Gurugram",
+            victim_state: "Haryana",
+            fraud_method: "Loan App Harassment"
+          }
+        }
+      }
+    ];
+    return jsonResponse({ count: dispatches.length, results: dispatches }, 200);
+  }
+
+  // Gateway Monitor Webhooks
+  if (path.includes('/predictions/gateway/webhooks')) {
+    return jsonResponse({
+      gateway_status: "OPERATIONAL",
+      uptime_percent: 99.98,
+      active_channels: {
+        iso8583_banking_switch: { status: "ONLINE", latency_ms: 14, tps: 342 },
+        npci_14c_webhook_stream: { status: "ONLINE", latency_ms: 22, queue_depth: 0 },
+        mha_1930_ncrp_sync: { status: "ONLINE", latency_ms: 48, sync_status: "SYNCED" },
+        state_cctns_dispatch: { status: "ONLINE", active_nodes: 36 }
+      },
+      recent_webhooks: [
+        {
+          id: "WH-SBI-88219",
+          source: "State Bank of India (ISO 8583 Switch)",
+          event: "HIGH_VELOCITY_ATM_WITHDRAWAL",
+          amount: 45000,
+          location: "Jamtara Main Market ATM",
+          timestamp: new Date().toLocaleTimeString(),
+          validation: "PASSED_HMAC_SHA256"
+        },
+        {
+          id: "WH-HDFC-99120",
+          source: "HDFC Fraud Interception Webhook",
+          event: "MULE_ACCOUNT_FREEZE_TRIGGER",
+          amount: 120000,
+          location: "Nuh Sector 4 ATM",
+          timestamp: new Date(Date.now() - 35000).toLocaleTimeString(),
+          validation: "PASSED_HMAC_SHA256"
+        },
+        {
+          id: "WH-MHA-1930-44",
+          source: "MHA 1930 National Cyber Helpline",
+          event: "LIVE_COMPLAINT_INGRESS",
+          amount: 85000,
+          location: "Mathura Cyber Cell",
+          timestamp: new Date(Date.now() - 75000).toLocaleTimeString(),
+          validation: "VERIFIED_GOV_SIGNATURE"
+        }
+      ]
+    }, 200);
+  }
+
+  if (path.includes('/predictions/data/model-metrics')) {
+    return jsonResponse({
+      model_name: 'Calibrated LightGBM v3.0 (40 Districts)',
+      overall_accuracy: 0.942,
+      top_1_accuracy: 0.884,
+      top_3_accuracy: 0.968,
+      brier_score: 0.041,
+      expected_calibration_error: 0.019,
+      auc_roc: 0.974,
+      sample_count: 50000,
+      metrics: {
+        top1: 0.884,
+        top3: 0.968,
+        top5: 0.985,
+        brier: 0.041,
+        auc_roc: 0.974,
+        sample_size: 50000,
+      }
+    }, 200);
   }
 
   if (path.includes('/api/v1/predictions/')) {
