@@ -1,7 +1,178 @@
+import supabase from './supabaseClient';
+
 /**
- * Mock Backend Provider for GitHub Pages / Static Hosting.
- * Provides client-side responses for all CrimeCast endpoints when no live backend is reachable.
+ * Mock & Supabase Data Provider for CrimeCast.
+ * Fetches real data from Supabase DB tables (e.g. complaints) when available,
+ * falling back seamlessly to structured mock data if Supabase connection fails.
  */
+
+let cachedComplaints = null;
+let lastFetchTime = 0;
+
+function mapSupabaseRowToComplaint(row, idx) {
+  const amount = Number(row.fraud_amount || row.amount_lost || row.amount || 150000);
+  const createdDate = row.created_at || row.complaint_timestamp || new Date().toISOString();
+
+  const state = row.victim_state || row.state || 'Karnataka';
+  const district = row.victim_district || row.district || 'Bengaluru Urban';
+  const suspectBank = row.suspect_bank || 'HDFC Bank';
+  const suspectAcc = row.suspect_account_number || row.suspect_account || '918237465012';
+  const victimName = row.victim_name || row.complainant_name || row.name || 'Complainant';
+  const victimPhone = row.victim_phone || row.complainant_phone || row.phone || '+91 98450 12345';
+
+  const categoryMap = {
+    'UPI': 'UPI Fraud',
+    'EMAIL_PHISHING': 'Phishing / Malware',
+    'PHONE_CALL': 'Vishing / Impersonation',
+    'NET_BANKING': 'Net Banking Fraud',
+  };
+  const category = categoryMap[row.fraud_method] || row.fraud_method || row.category || 'UPI Fraud';
+  const narrative = row.narrative_text || row.narrative || row.description || 'Phishing QR Code / Remote Access Screen Share';
+
+  const elapsedMins = Math.floor((Date.now() - new Date(createdDate).getTime()) / 60000);
+  const goldenWindow = Math.max(0, 60 - Math.max(0, elapsedMins % 90));
+
+  const freezeStatusMap = {
+    'CLOSED': 'FROZEN_FULL',
+    'PREDICTION_ACTIVE': 'PENDING_NODAL',
+    'INTERCEPTED': 'FROZEN_FULL',
+  };
+  const freezeStatus = freezeStatusMap[row.status] || (row.priority === 'CRITICAL' ? 'PENDING_NODAL' : 'INITIATED');
+
+  const compNum = row.complaint_number || row.id || `CMP-2026-${8840 + idx}`;
+  const ackNum = row.acknowledgement_number || (row.complaint_number ? (row.complaint_number.startsWith('NCRP') ? row.complaint_number : `NCRP-2026-IN-${row.complaint_number.replace(/[^0-9]/g, '') || idx}`) : `NCRP-2026-IN-${98214 + idx}`);
+
+  return {
+    id: compNum,
+    complaint_number: compNum,
+    acknowledgement_number: ackNum,
+    category: category,
+    fraud_method: category,
+    sub_category: narrative.length > 60 ? narrative.substring(0, 60) + '...' : narrative,
+    amount_lost: amount,
+    fraud_amount: amount,
+    priority: row.priority || (amount > 500000 ? 'CRITICAL' : 'HIGH'),
+    status: row.status || 'PREDICTION_ACTIVE',
+    incident_date: row.fraud_timestamp || row.incident_date || createdDate,
+    fraud_timestamp: row.fraud_timestamp || row.incident_date || createdDate,
+    created_at: createdDate,
+    complaint_timestamp: createdDate,
+    state: state,
+    victim_state: state,
+    district: district,
+    victim_district: district,
+    suspect_account: suspectAcc,
+    suspect_bank: suspectBank,
+    complainant_name: victimName,
+    victim_name: victimName,
+    complainant_phone: victimPhone,
+    victim_phone: victimPhone,
+    narrative_text: narrative,
+    golden_window_remaining_mins: goldenWindow,
+    chain_hops_detected: (idx % 5) + 3,
+    freeze_status: freezeStatus,
+    transaction_hops: row.transaction_hops || [
+      { from_bank: 'Victim Primary Account', from_account: victimPhone.replace(/[^0-9]/g, '').slice(-4) || '9845', amount: amount, is_mule_flagged: false },
+      { from_bank: suspectBank, from_account: suspectAcc, amount: amount, is_mule_flagged: true }
+    ]
+  };
+}
+
+export async function fetchLiveComplaints() {
+  const now = Date.now();
+  if (cachedComplaints && (now - lastFetchTime < 5000)) {
+    return cachedComplaints;
+  }
+  try {
+    const { data, error } = await supabase
+      .from('complaints')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error || !data || data.length === 0) {
+      return MOCK_COMPLAINTS;
+    }
+
+    const mapped = data.map((row, idx) => mapSupabaseRowToComplaint(row, idx));
+    const merged = [...MOCK_COMPLAINTS.filter(mc => mc.isLocalCreated), ...mapped];
+    cachedComplaints = merged;
+    lastFetchTime = now;
+    return merged;
+  } catch (err) {
+    console.warn('[mockBackend] Supabase fetch exception:', err);
+    return MOCK_COMPLAINTS;
+  }
+}
+
+export async function getLiveStats() {
+  const complaints = await fetchLiveComplaints();
+  const dbAmount = complaints.reduce((acc, c) => acc + (Number(c.amount_lost) || 0), 0);
+  const totalIntercepted = 5670000000 + Math.floor(dbAmount * 0.85);
+  const cr = (totalIntercepted / 10000000).toFixed(0);
+
+  const activePreds = complaints.filter(c => c.status === 'PREDICTION_ACTIVE' || c.priority === 'CRITICAL').length || MOCK_DASHBOARD_STATS.active_predictions;
+
+  const trendCounts = [14, 22, 19, 31, 28, 35, 42, 38, 49, 54, 48, 62, 58, 71, complaints.length];
+
+  return {
+    ...MOCK_DASHBOARD_STATS,
+    total_complaints: complaints.length > MOCK_DASHBOARD_STATS.total_complaints ? complaints.length : (MOCK_DASHBOARD_STATS.total_complaints + complaints.length),
+    active_predictions: activePreds,
+    intercepted_amount: totalIntercepted,
+    intercepted_formatted: `₹ ${cr} Cr`,
+    fraud_trend: trendCounts,
+    trend_30d: trendCounts,
+  };
+}
+
+export async function getLivePredictions() {
+  const complaints = await fetchLiveComplaints();
+  const activeList = complaints.filter(c => c.status === 'PREDICTION_ACTIVE' || c.priority === 'CRITICAL').slice(0, 10);
+  if (!activeList.length) return MOCK_PREDICTIONS;
+
+  const districtCoords = {
+    'Bengaluru': { lat: 12.9716, lon: 77.5946 },
+    'Bengaluru Urban': { lat: 12.9716, lon: 77.5946 },
+    'Mumbai': { lat: 19.0760, lon: 72.8777 },
+    'Mumbai Suburban': { lat: 19.0760, lon: 72.8777 },
+    'Pune': { lat: 18.5204, lon: 73.8567 },
+    'New Delhi': { lat: 28.6139, lon: 77.2090 },
+    'Delhi': { lat: 28.6139, lon: 77.2090 },
+    'Jaipur': { lat: 26.9124, lon: 75.7873 },
+    'Agra': { lat: 27.1767, lon: 78.0081 },
+    'Warangal': { lat: 17.9689, lon: 79.5941 },
+    'Hyderabad': { lat: 17.3850, lon: 78.4867 },
+    'Gurugram': { lat: 28.4595, lon: 77.0266 },
+  };
+
+  return activeList.map((c, i) => {
+    const coords = districtCoords[c.district] || districtCoords[c.state] || { lat: 12.9716 + (i * 0.4), lon: 77.5946 + (i * 0.3) };
+    return {
+      id: `PRED-2026-${String(i + 1).padStart(3, '0')}`,
+      complaint_ack: c.acknowledgement_number || c.id,
+      complaint: c.id,
+      lat: coords.lat,
+      lon: coords.lon,
+      district: c.district,
+      state: c.state,
+      risk_score: Number((0.85 + (i * 0.02) % 0.13).toFixed(2)),
+      probability: Number((0.85 + (i * 0.02) % 0.13).toFixed(2)),
+      confidence: c.priority === 'CRITICAL' ? 'CRITICAL' : 'HIGH',
+      time_window_mins: c.golden_window_remaining_mins || (20 + (i * 5)),
+      predicted_cashout_zone: `${c.district} ATM & Micro-ATM Hub #${i + 1}`,
+      outcome: c.status === 'CLOSED' ? 'INTERCEPTED' : 'PENDING',
+      suspect_bank: c.suspect_bank,
+      amount: c.amount_lost,
+      mule_account: `${c.suspect_account.substring(0, 6)}... (${c.suspect_bank})`,
+      top_features: [
+        { name: 'Velocity of transfer', contribution: '+0.34' },
+        { name: 'ATM night withdrawal pattern', contribution: '+0.28' },
+        { name: 'New UPI device registration', contribution: '+0.21' },
+      ],
+    };
+  });
+}
+
 
 const DEMO_OFFICERS = [
   {
@@ -310,12 +481,19 @@ export const MOCK_FREEZE_QUEUE = [
 
 export const MOCK_GRAPH_NETWORK = {
   nodes: [
-    { id: 'VIC-1', label: 'Victim (Bengaluru)', type: 'victim', amount: 485000 },
-    { id: 'MULE-1', label: 'Mule 1 (HDFC)', type: 'mule_layer_1', amount: 485000, hash: '562a4f9309f5' },
-    { id: 'MULE-2', label: 'Mule 2 (Axis)', type: 'mule_layer_2', amount: 300000, hash: '7953d77bed72' },
-    { id: 'MULE-3', label: 'Mule 3 (ICICI)', type: 'mule_layer_2', amount: 185000, hash: '92a4de7b02f4' },
-    { id: 'ATM-1', label: 'ATM #42 (Koramangala)', type: 'cashout_target', amount: 185000 },
-    { id: 'SYND-1', label: 'Operation Garuda Syndicate', type: 'syndicate_core', score: 98 },
+    { id: 'VIC-1', label: 'Victim (Bengaluru)', node_type: 'VICTIM', bank_ifsc: 'HDFC0001234', account_hash: '9845012345', total_volume: 485000, amount: 485000 },
+    { id: 'MULE-1', label: 'Mule 1 (HDFC)', node_type: 'SUSPECT_MULE', bank_ifsc: 'HDFC0005678', account_hash: '562a4f9309f5', freeze_status: 'INITIATED', total_volume: 485000, amount: 485000 },
+    { id: 'MULE-2', label: 'Mule 2 (Axis)', node_type: 'CONFIRMED_MULE', bank_ifsc: 'UTIB0009876', account_hash: '7953d77bed72', freeze_status: 'FROZEN', total_volume: 300000, amount: 300000 },
+    { id: 'MULE-3', label: 'Mule 3 (ICICI)', node_type: 'CONFIRMED_MULE', bank_ifsc: 'ICIC0003456', account_hash: '92a4de7b02f4', freeze_status: 'FROZEN', total_volume: 185000, amount: 185000 },
+    { id: 'ATM-1', label: 'ATM #42 (Koramangala)', node_type: 'CASHOUT_ATM', bank_ifsc: 'ATM-KRM-042', account_hash: 'ATM42000011', freeze_status: 'MONITORED', total_volume: 185000, amount: 185000 },
+    { id: 'SYND-1', label: 'Operation Garuda Syndicate', node_type: 'SYNDICATE_HUB', bank_ifsc: 'CRYPTO-USDT-HOT', account_hash: '0x8f92a10b4c', freeze_status: 'BLACK_LISTED', total_volume: 300000, amount: 300000 },
+  ],
+  edges: [
+    { id: 'e1', source: 'VIC-1', target: 'MULE-1', amount: 485000, tx: 'UPI-TX-10928' },
+    { id: 'e2', source: 'MULE-1', target: 'MULE-2', amount: 300000, tx: 'IMPS-TX-20918' },
+    { id: 'e3', source: 'MULE-1', target: 'MULE-3', amount: 185000, tx: 'IMPS-TX-20919' },
+    { id: 'e4', source: 'MULE-3', target: 'ATM-1', amount: 185000, tx: 'ATM-DISPATCH-PRED' },
+    { id: 'e5', source: 'MULE-2', target: 'SYND-1', amount: 300000, tx: 'OTC-USDT' },
   ],
   links: [
     { source: 'VIC-1', target: 'MULE-1', amount: 485000, tx: 'UPI-TX-10928' },
@@ -325,6 +503,40 @@ export const MOCK_GRAPH_NETWORK = {
     { source: 'MULE-2', target: 'SYND-1', amount: 300000, tx: 'OTC-USDT' },
   ],
 };
+
+export const MOCK_EVIDENCE_LIST = [
+  {
+    id: 'EV-2026-001',
+    complaint_number: 'NCRP-2026-IN-98214',
+    title: 'ATM-HDFC-ALLD-04 Kiosk CCTV Stream Footage',
+    evidence_type: 'CCTV_FOOTAGE',
+    evidence_type_display: 'CCTV Kiosk Footage',
+    description: 'Statutory Sec 91 CrPC direct video capture (02:15 AM - 02:45 AM). Captures suspect withdrawal.',
+    sha256_hash: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
+    atm_id: 'ATM-HDFC-ALLD-04',
+    target_bank: 'HDFC Bank Ltd., Civil Lines Kiosk',
+    atm_address: '12 Sardar Patel Marg, Civil Lines, Prayagraj',
+    created_at: new Date(Date.now() - 120 * 60000).toISOString(),
+    custody_logs: [
+      { action: 'INITIAL_SEAL', timestamp: new Date(Date.now() - 120 * 60000).toISOString(), details: 'Automated SHA-256 seal assigned at ingestion.', performed_by: 'Insp. Singh', role: 'Field Officer', ip_address: '10.24.18.91' },
+      { action: 'VERIFIED', timestamp: new Date(Date.now() - 30 * 60000).toISOString(), details: 'SHA-256 hash verified against master ledger.', performed_by: 'DSP Sharma', role: 'Station Head', ip_address: '10.24.18.102' }
+    ]
+  },
+  {
+    id: 'EV-2026-002',
+    complaint_number: 'NCRP-2026-IN-98215',
+    title: 'UPI Payment Receipt & Bank UTR Certificate',
+    evidence_type: 'TRANSACTION_PROOF',
+    evidence_type_display: 'Payment Proof',
+    description: 'Victim ICICI netbanking transaction receipt with UTR 409817263910.',
+    sha256_hash: '8f434346648f6b96df89dda901c5176b10a6d83961dd3c1ac88b59b2dc327aa4',
+    target_bank: 'ICICI Bank Ltd',
+    created_at: new Date(Date.now() - 180 * 60000).toISOString(),
+    custody_logs: [
+      { action: 'INITIAL_SEAL', timestamp: new Date(Date.now() - 180 * 60000).toISOString(), details: 'Ingested via NCRP API gateway.', performed_by: 'NCRP Automated System', role: 'System Gateway', ip_address: '192.168.1.1' }
+    ]
+  }
+];
 
 /**
  * Handle incoming mock API requests in browser memory.
@@ -416,19 +628,59 @@ export async function handleMockRequest(endpoint, options = {}) {
 
   // 5. Dashboard Stats: /api/v1/dashboard/stats
   if (path.includes('/dashboard/stats')) {
-    return jsonResponse(MOCK_DASHBOARD_STATS, 200);
+    const stats = await getLiveStats();
+    return jsonResponse(stats, 200);
   }
 
-  // 6. Complaints: /api/v1/complaints
-  if (path.endsWith('/api/v1/complaints')) {
+  // 6. Evidence Vault: /api/v1/complaints/evidence
+  if (path.includes('/complaints/evidence')) {
+    if (method === 'POST' && path.includes('/verify')) {
+      const parts = path.split('/');
+      const evId = parts[parts.length - 2];
+      const item = MOCK_EVIDENCE_LIST.find(e => e.id === evId) || MOCK_EVIDENCE_LIST[0];
+      return jsonResponse({
+        success: true,
+        sha256_hash: item.sha256_hash,
+        message: 'Cryptographic SHA-256 seal matches stored evidence master. Tamper check: 100% Intact.'
+      }, 200);
+    }
     if (method === 'POST') {
       let body = {};
       if (typeof options.body === 'string') {
         try { body = JSON.parse(options.body); } catch {}
       }
-      const newComplaint = {
+      const newEv = {
+        id: `EV-2026-${Math.floor(100 + Math.random() * 900)}`,
+        complaint_number: body.complaint_id || 'NCRP-2026-IN-98214',
+        title: body.title || 'Sec 91 CrPC Directive / Evidence Artifact',
+        evidence_type: body.evidence_type || 'CCTV_REQUEST',
+        evidence_type_display: body.evidence_type === 'CCTV_REQUEST' ? 'CCTV Directive' : 'Secured Evidence',
+        description: body.description || `ATM Directive for ${body.atm_id || 'Kiosk'} (${body.bank_name || 'Bank'})`,
+        sha256_hash: Array.from({length: 64}, () => Math.floor(Math.random()*16).toString(16)).join(''),
+        atm_id: body.atm_id || 'ATM-HDFC-ALLD-04',
+        target_bank: body.bank_name || 'HDFC Bank Ltd',
+        atm_address: body.atm_address || 'Civil Lines, Prayagraj',
+        created_at: new Date().toISOString(),
+        custody_logs: [
+          { action: 'INITIAL_SEAL', timestamp: new Date().toISOString(), details: 'Issued and sealed in tamper-evident vault.', performed_by: 'Insp. Singh', role: 'Field Officer', ip_address: '10.24.18.91' }
+        ]
+      };
+      MOCK_EVIDENCE_LIST.unshift(newEv);
+      return jsonResponse(newEv, 201);
+    }
+    return jsonResponse({ count: MOCK_EVIDENCE_LIST.length, results: MOCK_EVIDENCE_LIST }, 200);
+  }
+
+  // 7. Complaints List & Creation: /api/v1/complaints
+  if (path === '/api/v1/complaints' || path.endsWith('/api/v1/complaints')) {
+    if (method === 'POST') {
+      let body = {};
+      if (typeof options.body === 'string') {
+        try { body = JSON.parse(options.body); } catch {}
+      }
+      const newComplaint = mapSupabaseRowToComplaint({
         id: `CMP-2026-${Math.floor(1000 + Math.random() * 9000)}`,
-        acknowledgement_number: `NCRP-2026-IN-${Math.floor(10000 + Math.random() * 90000)}`,
+        complaint_number: `NCRP-2026-IN-${Math.floor(10000 + Math.random() * 90000)}`,
         category: body.category || 'UPI Fraud',
         sub_category: body.sub_category || 'Unauthorized Transaction',
         amount_lost: Number(body.amount_lost) || 50000,
@@ -441,27 +693,72 @@ export async function handleMockRequest(endpoint, options = {}) {
         suspect_account: body.suspect_account || '883920194821',
         suspect_bank: body.suspect_bank || 'State Bank of India',
         complainant_name: body.complainant_name || 'Complainant',
-      };
+        isLocalCreated: true,
+      }, 0);
       MOCK_COMPLAINTS.unshift(newComplaint);
+      // Attempt insert into Supabase as best-effort
+      try {
+        await supabase.from('complaints').insert([{
+          complaint_number: newComplaint.acknowledgement_number,
+          victim_name: newComplaint.complainant_name,
+          victim_phone: '9845012345',
+          victim_district: newComplaint.district,
+          victim_state: newComplaint.state,
+          fraud_amount: newComplaint.amount_lost,
+          fraud_method: newComplaint.category,
+          narrative_text: body.narrative_text || 'Reported via CrimeCast Portal',
+          status: 'PREDICTION_ACTIVE',
+          priority: 'CRITICAL'
+        }]);
+      } catch (sbErr) {
+        // Ignored if RLS prevents anon insert
+      }
       return jsonResponse(newComplaint, 201);
     }
+
+    let list = await fetchLiveComplaints();
+    
+    // Parse search & status parameters
+    try {
+      const dummyUrl = new URL(endpoint.startsWith('/') ? `http://localhost${endpoint}` : endpoint);
+      const searchParam = (dummyUrl.searchParams.get('search') || '').toLowerCase();
+      const statusParam = dummyUrl.searchParams.get('status');
+
+      if (searchParam) {
+        list = list.filter(c => 
+          (c.victim_name && c.victim_name.toLowerCase().includes(searchParam)) ||
+          (c.complainant_name && c.complainant_name.toLowerCase().includes(searchParam)) ||
+          (c.id && c.id.toLowerCase().includes(searchParam)) ||
+          (c.acknowledgement_number && c.acknowledgement_number.toLowerCase().includes(searchParam)) ||
+          (c.district && c.district.toLowerCase().includes(searchParam)) ||
+          (c.state && c.state.toLowerCase().includes(searchParam)) ||
+          (c.suspect_bank && c.suspect_bank.toLowerCase().includes(searchParam)) ||
+          (c.suspect_account && c.suspect_account.toLowerCase().includes(searchParam))
+        );
+      }
+      if (statusParam) {
+        list = list.filter(c => c.status === statusParam);
+      }
+    } catch {}
+
     return jsonResponse({
-      count: MOCK_COMPLAINTS.length,
+      count: list.length,
       next: null,
       previous: null,
-      results: MOCK_COMPLAINTS,
+      results: list,
     }, 200);
   }
 
-  // 7. Single Complaint: /api/v1/complaints/:id
+  // 8. Single Complaint Detail: /api/v1/complaints/:id
   if (path.includes('/api/v1/complaints/')) {
     const parts = path.split('/');
     const id = parts[parts.length - 1];
-    const found = MOCK_COMPLAINTS.find(c => c.id === id || c.acknowledgement_number === id) || MOCK_COMPLAINTS[0];
+    const list = await fetchLiveComplaints();
+    const found = list.find(c => c.id === id || c.acknowledgement_number === id || c.complaint_number === id) || list[0];
     return jsonResponse(found, 200);
   }
 
-  // 8. Predictions: /api/v1/predictions
+  // 9. Predictions: /api/v1/predictions
   if (path.includes('/predictions/data/model-metrics')) {
     return jsonResponse({
       model_name: 'Calibrated LightGBM v3.0 (40 Districts)',
@@ -476,31 +773,41 @@ export async function handleMockRequest(endpoint, options = {}) {
   }
 
   if (path.includes('/predictions/alerts')) {
-    return jsonResponse({ count: MOCK_PREDICTIONS.length, results: MOCK_PREDICTIONS }, 200);
+    const preds = await getLivePredictions();
+    return jsonResponse({ count: preds.length, results: preds }, 200);
   }
 
   if (path.includes('/predictions/simulate-webhook')) {
     return jsonResponse({ success: true, message: 'Simulation dispatched' }, 200);
   }
 
+  if (path.includes('/api/v1/predictions/')) {
+    const parts = path.split('/');
+    const predId = parts[parts.length - 1];
+    const preds = await getLivePredictions();
+    const found = preds.find(p => p.id === predId || p.complaint === predId || p.complaint_ack === predId) || preds[0];
+    return jsonResponse(found, 200);
+  }
+
   if (path.endsWith('/api/v1/predictions')) {
+    const preds = await getLivePredictions();
     return jsonResponse({
-      count: MOCK_PREDICTIONS.length,
-      results: MOCK_PREDICTIONS,
+      count: preds.length,
+      results: preds,
     }, 200);
   }
 
-  // 9. Freeze Queue: /api/v1/freeze/queue or /api/v2/freeze
+  // 10. Freeze Queue: /api/v1/freeze/queue or /api/v2/freeze
   if (path.includes('/freeze')) {
     return jsonResponse({ count: MOCK_FREEZE_QUEUE.length, results: MOCK_FREEZE_QUEUE }, 200);
   }
 
-  // 10. Graph Network: /api/v1/graph or /api/v2/graph
+  // 11. Graph Network: /api/v1/graph or /api/v2/graph
   if (path.includes('/graph')) {
     return jsonResponse(MOCK_GRAPH_NETWORK, 200);
   }
 
-  // 11. CyberGuru AI Assistant: /api/v1/guru/query or chat
+  // 12. CyberGuru AI Assistant: /api/v1/guru/query or chat
   if (path.includes('/guru')) {
     return jsonResponse({
       answer: 'Analysis complete: This complaint displays multi-hop mule layering characteristic of Operation Garuda. Recommendation: Execute Section 106 BNSS freeze order immediately on Tier-1 HDFC account.',

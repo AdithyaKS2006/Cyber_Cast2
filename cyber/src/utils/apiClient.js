@@ -47,11 +47,20 @@ export default async function apiClient(endpoint, options = {}) {
     ? endpoint
     : `${apiBase}${endpoint.startsWith('/') ? '' : '/'}${endpoint}`;
 
-  const response = await fetch(url, {
-    ...options,
-    credentials: 'include',
-    headers,
-  });
+  let response;
+  try {
+    response = await fetch(url, {
+      ...options,
+      credentials: 'include',
+      headers,
+    });
+  } catch (netErr) {
+    if (endpoint.includes('/api/')) {
+      console.warn('[apiClient] Fetch failed, routing to mock provider:', netErr);
+      return handleMockRequest(endpoint, options);
+    }
+    throw netErr;
+  }
 
   // Debug logging
   console.debug(`[apiClient] ${options.method || 'GET'} ${endpoint}`);

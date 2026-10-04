@@ -44,9 +44,13 @@ export default function EvidenceLocker({ complaintId, navigate }) {
         ? `/api/v1/complaints/evidence/?complaint_id=${complaintId}`
         : '/api/v1/complaints/evidence/';
       const res = await apiClient.get(url);
-      setEvidenceList(res.data || []);
+      const items = Array.isArray(res.data) 
+        ? res.data 
+        : (Array.isArray(res?.data?.results) ? res.data.results : []);
+      setEvidenceList(items);
     } catch (err) {
       console.error('Failed to fetch evidence:', err);
+      setEvidenceList([]);
     } finally {
       setLoading(false);
     }
