@@ -80,7 +80,8 @@ const DemoControlPanel = () => {
       // Step 1: Alert Fired (T+0s)
       setTimelineSteps([{ step: 1, label: 'T+0.0s: Alert fired from NPCI Gateway', status: 'active' }]);
 
-      const response = await fetch('http://localhost:8001/fire-fraud-alert', {
+      const mockNpciBase = import.meta.env.VITE_MOCK_NPCI_URL || (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') ? 'http://localhost:8001' : '/mock-npci');
+      const response = await fetch(`${mockNpciBase}/fire-fraud-alert`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -127,7 +128,7 @@ const DemoControlPanel = () => {
 
     } catch (err) {
       console.error('Fraud alert simulation failed:', err);
-      setErrorMessage(err.message || 'Failed to communicate with Mock NPCI Server at http://localhost:8001');
+      setErrorMessage(err.message || 'Failed to communicate with Mock NPCI Server');
       setLoading(false);
     }
   };

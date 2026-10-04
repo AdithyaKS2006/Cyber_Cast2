@@ -1,3 +1,4 @@
+import os
 import hmac
 import hashlib
 import json
@@ -13,8 +14,9 @@ app = FastAPI(
     description="Simulates NPCI real-time fraud alert telemetry webhooks with HMAC signing."
 )
 
-CRIMECAST_INGEST_URL = "http://localhost:8000/api/v2/ingest/npci-alert/"
-SHARED_SECRET = "dev-secret-change-in-prod"
+APP_BASE_URL = (os.getenv("CRIMECAST_APP_URL") or os.getenv("CRIMECAST_INGEST_URL_BASE") or "http://localhost:8000").rstrip("/")
+CRIMECAST_INGEST_URL = f"{APP_BASE_URL}/api/v2/ingest/npci-alert/"
+SHARED_SECRET = os.getenv("SHARED_SECRET", "dev-secret-change-in-prod")
 
 
 class FraudAlertRequest(BaseModel):
