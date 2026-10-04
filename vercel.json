@@ -1,13 +1,38 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "buildCommand": "cd cyber && npm run build",
-  "outputDirectory": "cyber/dist",
-  "installCommand": "cd cyber && npm install",
-  "cleanUrls": true,
+  "services": {
+    "app": {
+      "root": "cyber",
+      "framework": "vite",
+      "installCommand": "npm install",
+      "buildCommand": "npm run build"
+    },
+    "mock_npci": {
+      "root": "cyber/demo/mock_npci",
+      "framework": "fastapi",
+      "installCommand": "pip install -r requirements.txt",
+      "bindings": [
+        {
+          "type": "service",
+          "service": "app",
+          "format": "url",
+          "env": "CRIMECAST_APP_URL"
+        }
+      ]
+    }
+  },
   "rewrites": [
     {
+      "source": "/mock-npci/(.*)",
+      "destination": {
+        "service": "mock_npci"
+      }
+    },
+    {
       "source": "/(.*)",
-      "destination": "/index.html"
+      "destination": {
+        "service": "app"
+      }
     }
   ]
 }

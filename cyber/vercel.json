@@ -3,11 +3,14 @@
   "services": {
     "app": {
       "root": ".",
-      "framework": "vite"
+      "framework": "vite",
+      "installCommand": "npm install",
+      "buildCommand": "npm run build"
     },
     "mock_npci": {
       "root": "demo/mock_npci",
       "framework": "fastapi",
+      "installCommand": "pip install -r requirements.txt",
       "bindings": [
         {
           "type": "service",
